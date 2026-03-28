@@ -9,6 +9,7 @@ export default function IntroSection() {
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Video */}
       <video
+        key="home-video"
         autoPlay
         muted
         loop
