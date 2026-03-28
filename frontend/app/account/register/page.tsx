@@ -145,7 +145,6 @@ export default function RegisterPage() {
                     <option value="" className="text-gray-500">Giới tính</option>
                     <option value="male">Nam</option>
                     <option value="female">Nữ</option>
-                    <option value="other">Khác</option>
                   </select>
                 </div>
               </div>

@@ -1,10 +1,31 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { handleGoogleSuccess, handleEmailLogin, handleGoogleError } from '@/app/lib/authService';
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onGoogleSuccess = async (credentialResponse: CredentialResponse) => { //credentialResponse = dữ liệu Google trả về sau khi loginKiểu: CredentialResponse
+
+    await handleGoogleSuccess(credentialResponse, setLoading); // Nhận credentialResponse,Gửi vào handleGoogleSuccess
+  };
+
+  const onGoogleError = () => {
+    handleGoogleError();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleEmailLogin(email, password, rememberMe, setLoading);
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
@@ -16,25 +37,25 @@ export default function LoginPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/30" /> {/* Overlay tối */}
+        <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      {/* Header - Giống trang Register */}
+      {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-8 py-6 text-white">
         <Link href="/" className="flex items-center hover:opacity-90 transition">
-            <div className="flex items-center">
-                <div className="text-2xl text-blue-400 font-bold tracking-wider">DTU_TRAVEL</div>
-                <div className="relative -mt-7">
-                    <Image
-                        src="/logo.png"           
-                        alt="DTU Travel Logo"
-                        width={100}               
-                        height={50}
-                        className="h-20 w-auto"   
-                        priority
-                    />
-                </div>
+          <div className="flex items-center">
+            <div className="text-2xl text-blue-400 font-bold tracking-wider">DTU_TRAVEL</div>
+            <div className="relative -mt-7">
+              <Image
+                src="/logo.png"           
+                alt="DTU Travel Logo"
+                width={100}               
+                height={50}
+                className="h-20 w-auto"   
+                priority
+              />
             </div>
+          </div>
         </Link>
 
         <div className="flex items-center gap-8 text-sm">
@@ -70,7 +91,7 @@ export default function LoginPage() {
             <h1 className="text-3xl font-semibold text-gray-900">Chào mừng trở lại</h1>
           </div>
 
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div className="relative">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -79,8 +100,10 @@ export default function LoginPage() {
               <input
                 type="email"
                 placeholder="Email của bạn"
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
-                           text-black placeholder:text-gray-600"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-black placeholder:text-gray-600"
+                required
               />
             </div>
 
@@ -92,35 +115,43 @@ export default function LoginPage() {
               <input
                 type="password"
                 placeholder="Mật khẩu"
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
-                           text-black placeholder:text-gray-600"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-black placeholder:text-gray-600"
+                required
               />
             </div>
 
             {/* Nhớ mật khẩu + Quên mật khẩu */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 accent-blue-500" />
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 accent-blue-500" 
+                />
                 <span className="text-gray-600">Nhớ mật khẩu</span>
               </label>
-                <Link 
-                  href="/account/forgotpassword" 
-                  className="text-blue-600 hover:underline text-sm font-medium"
-                  >
-                  Quên mật khẩu?
-                </Link>
+              <Link 
+                href="/account/forgotpassword" 
+                className="text-blue-600 hover:underline text-sm font-medium"
+              >
+                Quên mật khẩu?
+              </Link>
             </div>
 
             {/* Nút Đăng Nhập */}
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-4 rounded-2xl transition text-lg"
+              disabled={loading}
+              className="mt-1 w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-medium py-4 rounded-2xl transition text-lg"
             >
-              Đăng Nhập
+              {loading ? 'Đang xử lý...' : 'Đăng Nhập'}
             </button>
 
             {/* Hoặc */}
-            <div className="relative my-6">
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
@@ -130,17 +161,14 @@ export default function LoginPage() {
             </div>
 
             {/* Đăng nhập bằng Google */}
-            <button
-              type="button"
-              className="w-full border border-gray-300 hover:bg-gray-50 py-4 rounded-2xl flex items-center justify-center gap-3 transition"
-            >
-              <img
-                src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
-                alt="Google"
-                className="w-6 h-6"
+            <div className="w-full flex justify-center google-login">
+              <GoogleLogin
+                onSuccess={onGoogleSuccess}
+                onError={onGoogleError}
+                theme="outline"
+                size="large"
               />
-              <span className="font-medium text-gray-700">Đăng nhập bằng Google</span>
-            </button>
+            </div>
           </form>
 
           {/* Link chuyển sang Đăng ký */}
