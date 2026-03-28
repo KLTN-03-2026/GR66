@@ -13,4 +13,4 @@ export const connectDB = async () => {
     }
 }
 
-export default connectDB;  // xuất giá trị chính của file
+export default connectDB;  // xuất giá trị chính của filegit
