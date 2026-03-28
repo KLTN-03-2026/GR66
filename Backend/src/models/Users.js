@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // cho phép null mà không lỗi unique
+    },
+    
     sdt: {
       type: String,
     },

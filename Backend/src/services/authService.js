@@ -1,6 +1,9 @@
 import bcrypt from 'bcrypt';
+
 import User from '../models/Users.js';
-import Tour from "../models/Tour.js";
+import GoogleAuthLib, { OAuth2Client } from 'google-auth-library'
+import dotenv from 'dotenv'
+
 
 export const signUpService = async (data) => {
     const { role, hoten, email, matkhau, sdt, gioitinh, diachi } = data;
@@ -28,62 +31,39 @@ export const signUpService = async (data) => {
     return newUser;
 }
 
-
-// quản lý tour
-// Lấy danh sách + phân trang
-export const getTours = async (page = 1, limit = 5) => {
-    const skip = (page - 1) * limit;
-  
-    const tours = await Tour.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ thoigiantao: -1 });
-  
-    const total = await Tour.countDocuments();
-  
-    return {
-      tours,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    };
-  };
-  
-  // Lấy 1 tour
-  export const getTourById = async (id) => {
-    return await Tour.findById(id);
-  };
-  
-  // Tạo tour
-  export const createTour = async (data) => {
-    return await Tour.create(data);
-  };
-  
-  // Cập nhật tour
-  export const updateTour = async (id, data) => {
-    return await Tour.findByIdAndUpdate(id, data, { new: true });
-  };
-  
-  // Xoá tour
-  export const deleteTour = async (id) => {
-    return await Tour.findByIdAndDelete(id);
-  };
-  
-  // Tìm kiếm
-  export const searchTour = async (keyword) => {
-    return await Tour.find({
-      tentour: { $regex: keyword, $options: "i" },
-    });
-  };
-  
-  // Khoá / mở khoá
-  export const toggleTrangThai = async (id) => {
-    const tour = await Tour.findById(id);
-  
-    if (!tour) {
-      throw new Error("Tour không tồn tại");
+// Đăng nhập với google
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+export const loginGoogle = async (token) => {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    })
+    const payload = ticket.getPayload();
+    const userData = {
+        email: payload.email,
+        name: payload.name,
+        avatar: payload.picture,
+        googleId: payload.sub,
     }
-  
-    tour.trangthai = !tour.trangthai;
-    return await tour.save();
-  };
+    
+
+    // Kiểm tra user và lưu vào db
+
+    let user = await User.findOne({ googleId: userData.googleId });
+
+    if (!user) {
+        user = await User.create({
+            hoten: userData.name,
+            email: userData.email,
+            googleId: userData.googleId,
+            matkhau: "google-oauth", // vì login Google
+            role: "user",
+        });
+    } else {
+        // 5. Nếu có email nhưng chưa link googleId → update
+        if (!user.googleId) {
+            user.googleId = userData.googleId;
+            await user.save();
+        }
+    }
+}
