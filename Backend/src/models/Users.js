@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    ngaysinh:  {
+      type: Date,
+    },
 
     matkhau: {
       type: String,

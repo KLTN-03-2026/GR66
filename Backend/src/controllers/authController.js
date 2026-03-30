@@ -1,15 +1,35 @@
-import { signUpService , loginGoogle} from "../services/authService.js";
+import { signUpService , logincServices , loginGoogle } from "../services/authService.js";
 
 export const signupController = async(req, res) => {
     try {
         const user = await signUpService(req.body)
         return res.status(201).json({
-            message: "Đăng kí thành công"
+            success: true,
+            message: "Đăng kí thành công",
+            user
         })
     }catch(err){
-        return res.status(201).json({
+        const status = err.status || 400;
+        return res.status(status).json({
+            success: false,
             message: err.message
         })
+    }
+}
+
+export const loginController = async (req, res) => {
+    try{
+        const user = await logincServices(req.body);
+        return res.status(200).json({
+            success: true,
+            message: "Đăng nhập thành công",
+            user
+        })
+    } catch (err) {
+        return res.status(401).json({
+            message: err.message
+        })
+
     }
 }
 
@@ -33,6 +53,8 @@ export const loginWithGoogle = async (req, res) => {
         });
     }
 }
+
+
 
 
 

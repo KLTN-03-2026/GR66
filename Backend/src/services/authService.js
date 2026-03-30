@@ -1,17 +1,20 @@
 import bcrypt from 'bcrypt';
 import User from '../models/users.js';
 import GoogleAuthLib, { OAuth2Client } from 'google-auth-library'
-import dotenv from 'dotenv'
 
+
+// Đăng kí băng email và mật khẩu
 export const signUpService = async (data) => {
-    const { role, hoten, email, matkhau, sdt, gioitinh, diachi } = data;
-    if (!role || !hoten || !email || !matkhau || !sdt || !gioitinh || !diachi) {
+    const { role, hoten, email, matkhau, sdt, gioitinh, diachi, ngaysinh } = data;
+    if (!role || !hoten || !email || !matkhau || !sdt || !gioitinh || !diachi || !ngaysinh) {
         throw new Error("Thiếu dữ liệu nhập vào")
     }
     const duplicate = await User.findOne({ email })
 
     if (duplicate) {
-        throw new Error("Email đã tồn tại")
+        const err = new Error("Email đã tồn tại");
+        err.status = 409; 
+        throw err;
     }
     // mã hóa mật khẩu
     const hashPassword = await bcrypt.hash(matkhau, 10); // salt = 10 2^10 số lần trộn
@@ -20,19 +23,36 @@ export const signUpService = async (data) => {
         role,
         hoten,
         email,
+        ngaysinh,
         matkhau: hashPassword,
         sdt,
         gioitinh,
         diachi
     })
-    // return 
-    return newUser;
+    return newUser
 }
 
-
-
-
-
+//Đăng nhập bằnhg email và mật khẩu\
+export const logincServices = async (data) => {
+    const { email, matkhau } = data;
+    if (!email || !matkhau) {
+        throw new Error("Thiếu dữ liệu nhập vào")
+    }
+    //tìm người dùng theo email
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error("Email hoặc mật khẩu không đúng")
+    }
+    //So sánh mật khẩu (hash)
+    const isMatch = await bcrypt.compare(matkhau, user.matkhau);
+    if (!isMatch) {
+        throw new Error("Email hoặc mật khẩu không đúng");
+    }
+    // Trả dữ liệu user
+    const userData = user.toObject();
+    delete userData.matkhau;
+    return userData;
+}
 
 // Đăng nhập với google
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -49,11 +69,8 @@ export const loginGoogle = async (token) => {
         googleId: payload.sub,
     }
     
-
     // Kiểm tra user và lưu vào db
-
     let user = await User.findOne({ googleId: userData.googleId });
-
     if (!user) {
         user = await User.create({
             hoten: userData.name,
