@@ -5,7 +5,7 @@ import { useState } from "react";
 import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import {  useEffect } from "react";
+import { useEffect } from "react";
 
 
 /* ============ MAIN CONTENT ============ */
@@ -13,7 +13,7 @@ function BookingContent() {
   const [adult, setAdult] = useState(0);
   const [child, setChild] = useState(0);
   const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
-  const [totalPrice, setTotalPrice] = useState<number>(0);// lỗi 1
+
   const toggleExtra = (id: number, price?: number) => {
     if (selectedExtras.includes(id)) {
       // bỏ dịch vụ
@@ -23,25 +23,20 @@ function BookingContent() {
       setSelectedExtras(prev => [...prev, id]);
     }
   };
-  useEffect(() => {
-    const people = adult + child;
+  const people = adult + child;
 
-    let extraTotal = 0;
+  let extraTotal = 0;
 
-    tourData.extra.forEach(service => {
-      if (selectedExtras.includes(service.id)) {
-        extraTotal += service.price * people;
-      }
-    });
+  tourData.extra.forEach(service => {
+    if (selectedExtras.includes(service.id)) {
+      extraTotal += service.price * people;
+    }
+  });
 
-    const newTotalPrice = tourData.price * people + extraTotal;
-    if (newTotalPrice !== totalPrice) {
-      setTotalPrice(newTotalPrice);
-    } 
-  }, [adult, child, selectedExtras]); 
+  const totalPrice = tourData.price * people + extraTotal;
 
   const review = tourData.reviewSection;
-  
+
   const totalReviews = review.list.length;
 
 
@@ -119,7 +114,7 @@ function BookingContent() {
             </div>
             {/* DESCRIPTION end-----------------------------------------------------------------------------------------*/}
 
-           
+
             {/* ITINERARY */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
               <h2 className="font-semibold text-lg text-gray-800 mb-2">
@@ -233,7 +228,7 @@ function BookingContent() {
 
 
           {/* ===== RIGHT BOOKING ===== */}
-            <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm 
+          <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm 
                 sticky top-24 z-40">
             <p className="font-semibold text-2xl text-gray-800 mb-6">
               Tổng tiền: <span className="text-blue-600">{totalPrice.toLocaleString()} đ</span>
