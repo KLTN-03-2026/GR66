@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { handleGoogleSuccess,handleEmailSignup, handleEmailLogin, handleGoogleError } from '@/lib/authService';
+import { handleGoogleSuccess,handleEmailSignup, handleEmailLogin, handleGoogleError } from '@/app/lib/authService';
 
 export default function RegisterPage() {
   const [role, setRole] = useState('user'); // Mặc định là user
@@ -35,7 +35,11 @@ export default function RegisterPage() {
     await handleEmailSignup(role,hoten,email, password,sdt,gioitinh, diachi, ngaysinh,confirmPassword);
   };
 
- 
+  if(password !== confirmPassword){
+    alert("Mật khẩu xác nhận không khớp");
+    return;
+  }
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">

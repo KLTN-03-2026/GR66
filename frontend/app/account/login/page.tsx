@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { handleGoogleSuccess, handleEmailLogin, handleGoogleError } from '@/lib/authService';
+import { handleGoogleSuccess, handleEmailLogin, handleGoogleError } from '@/app/lib/authService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
