@@ -1,10 +1,42 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { handleGoogleSuccess,handleEmailSignup, handleEmailLogin, handleGoogleError } from '@/lib/authService';
 
 export default function RegisterPage() {
+  const [role, setRole] = useState('user'); // Mặc định là user
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [hoten, setHoten] = useState('');
+  const [sdt, setSdt] = useState('');
+  const [gioitinh, setGioitinh] = useState('');
+  const [diachi, setDiachi] = useState('');
+  const [ngaysinh, setNgaysinh] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+
+
+  const onGoogleSuccess = async (credentialResponse: CredentialResponse) => { //credentialResponse = dữ liệu Google trả về sau khi loginKiểu: CredentialResponse
+
+    await handleGoogleSuccess(credentialResponse); // Nhận credentialResponse,Gửi vào handleGoogleSuccess
+  };
+
+  const onGoogleError = () => {
+    handleGoogleError();
+  };
+
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleEmailSignup(role,hoten,email, password,sdt,gioitinh, diachi, ngaysinh,confirmPassword);
+  };
+
+ 
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
@@ -70,7 +102,7 @@ export default function RegisterPage() {
             <h1 className="text-3xl font-semibold text-gray-900">Đăng ký tài khoản</h1>
           </div>
 
-          <form className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-5">
               {/* Họ và tên */}
               <div>
@@ -81,6 +113,8 @@ export default function RegisterPage() {
                   <input
                     type="text"
                     placeholder="Họ và tên"
+                    value={hoten}
+                    onChange={(e) => setHoten(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -96,6 +130,8 @@ export default function RegisterPage() {
                   <input
                     type="email"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -111,6 +147,8 @@ export default function RegisterPage() {
                   <input
                     type="tel"
                     placeholder="Số điện thoại"
+                    value={sdt}
+                    onChange={(e) => setSdt(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -126,6 +164,8 @@ export default function RegisterPage() {
                   <input
                     type="text"
                     placeholder="dd/mm/yy"
+                    value={ngaysinh}
+                    onChange={(e) => setNgaysinh(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -139,12 +179,14 @@ export default function RegisterPage() {
                     ⚤
                   </div>
                   <select 
+                  value={gioitinh}
+                  onChange={(e) => setGioitinh(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black bg-white"
                   >
                     <option value="" className="text-gray-500">Giới tính</option>
-                    <option value="male">Nam</option>
-                    <option value="female">Nữ</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nu">Nữ</option>
                   </select>
                 </div>
               </div>
@@ -158,6 +200,8 @@ export default function RegisterPage() {
                   <input
                     type="text"
                     placeholder="Địa chỉ"
+                    value={diachi}
+                    onChange={(e) => setDiachi(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -173,6 +217,8 @@ export default function RegisterPage() {
                   <input
                     type="password"
                     placeholder="Mật khẩu"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -188,6 +234,8 @@ export default function RegisterPage() {
                   <input
                     type="password"
                     placeholder="Xác nhận mật khẩu"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
                                text-black placeholder:text-gray-600"
                   />
@@ -214,17 +262,14 @@ export default function RegisterPage() {
             </div>
 
             {/* Đăng ký bằng Google */}
-            <button
-              type="button"
-              className="w-full border border-gray-300 hover:bg-gray-50 py-4 rounded-2xl flex items-center justify-center gap-3 transition"
-            >
-              <img
-                src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
-                alt="Google"
-                className="w-6 h-6"
+            <div className="w-full flex justify-center google-login">
+              <GoogleLogin
+                onSuccess={onGoogleSuccess}
+                onError={onGoogleError}
+                theme="outline"
+                size="large"
               />
-              <span className="font-medium text-gray-700">Đăng ký bằng Google</span>
-            </button>
+            </div>
           </form>
 
           {/* Footer */}

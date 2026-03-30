@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { handleGoogleSuccess, handleEmailLogin, handleGoogleError } from '@/app/lib/authService';
+import { handleGoogleSuccess, handleEmailLogin, handleGoogleError } from '@/lib/authService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -14,17 +14,23 @@ export default function LoginPage() {
 
   const onGoogleSuccess = async (credentialResponse: CredentialResponse) => { //credentialResponse = dữ liệu Google trả về sau khi loginKiểu: CredentialResponse
 
-    await handleGoogleSuccess(credentialResponse, setLoading); // Nhận credentialResponse,Gửi vào handleGoogleSuccess
+    await handleGoogleSuccess(credentialResponse); // Nhận credentialResponse,Gửi vào handleGoogleSuccess
   };
 
   const onGoogleError = () => {
     handleGoogleError();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleEmailLogin(email, password, rememberMe, setLoading);
-  };
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    await handleEmailLogin(email, password, rememberMe);
+  } catch (error: any) {
+    alert(error.message || "Đăng nhập thất bại");
+    console.error("Login error:", error);
+  }
+};
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
