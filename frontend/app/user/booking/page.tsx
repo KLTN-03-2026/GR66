@@ -5,14 +5,45 @@ import { useState } from "react";
 import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import {  useEffect } from "react";
 
 
 /* ============ MAIN CONTENT ============ */
 function BookingContent() {
   const [adult, setAdult] = useState(0);
   const [child, setChild] = useState(0);
+  const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
+  const [totalPrice, setTotalPrice] = useState<number>(0);// lỗi 1
+  const toggleExtra = (id: number, price?: number) => {
+    if (selectedExtras.includes(id)) {
+      // bỏ dịch vụ
+      setSelectedExtras(prev => prev.filter(item => item !== id));
+    } else {
+      // thêm dịch vụ
+      setSelectedExtras(prev => [...prev, id]);
+    }
+  };
+  useEffect(() => {
+    const people = adult + child;
+
+    let extraTotal = 0;
+
+    tourData.extra.forEach(service => {
+      if (selectedExtras.includes(service.id)) {
+        extraTotal += service.price * people;
+      }
+    });
+
+    const newTotalPrice = tourData.price * people + extraTotal;
+    if (newTotalPrice !== totalPrice) {
+      setTotalPrice(newTotalPrice);
+    } 
+  }, [adult, child, selectedExtras]); 
+
   const review = tourData.reviewSection;
+  
   const totalReviews = review.list.length;
+
 
   const averageRating = totalReviews > 0
     ? review.list.reduce((sum, item) => sum + item.rating, 0) / totalReviews
@@ -88,7 +119,7 @@ function BookingContent() {
             </div>
             {/* DESCRIPTION end-----------------------------------------------------------------------------------------*/}
 
-            {/* ITINERARY */}
+           
             {/* ITINERARY */}
             <div className="bg-white rounded-xl p-5 shadow-sm">
               <h2 className="font-semibold text-lg text-gray-800 mb-2">
@@ -161,30 +192,38 @@ function BookingContent() {
               </div>
 
               {/* EXTRA SERVICES */}
-              {tourData.extra.map((service) => (
-                <div
-                  key={service.id}
-                  className="bg-white rounded-2xl p-5 shadow-sm border flex justify-between items-center"
-                >
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-2">
-                      {service.title}
-                    </h3>
+              {tourData.extra.map((service) => {
+                const isSelected = selectedExtras.includes(service.id);
 
-                    <p className="text-sm text-gray-600">
-                      {service.description}
-                    </p>
+                return (
+                  <div
+                    key={service.id}
+                    className="bg-white rounded-2xl p-5 shadow-sm border flex justify-between items-center"
+                  >
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">
+                        {service.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {service.description}
+                      </p>
+                      <p className="font-medium mt-2 text-red-500">
+                        Giá: {service.price.toLocaleString()} đ
+                      </p>
+                    </div>
 
-                    <p className="font-medium mt-2 text-red-400">
-                      Giá: {service.price.toLocaleString()} vnd
-                    </p>
+                    <button
+                      onClick={() => toggleExtra(service.id, service.price)}
+                      className={`px-6 py-2 text-sm font-medium rounded-full transition-all ${isSelected
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                        }`}
+                    >
+                      {isSelected ? "Đã thêm ✓" : "Thêm"}
+                    </button>
                   </div>
-
-                  <button className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full">
-                    Thêm
-                  </button>
-                </div>
-              ))}
+                );
+              })}
 
             </div>
           </div>
@@ -194,78 +233,45 @@ function BookingContent() {
 
 
           {/* ===== RIGHT BOOKING ===== */}
-          <div className="bg-white border rounded-xl p-5 h-fit shadow-sm ">
-            <p className="font-semibold text-lg text-gray-800 mb-4">
-              Total: {tourData.price} đ
+            <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm 
+                sticky top-24 z-40">
+            <p className="font-semibold text-2xl text-gray-800 mb-6">
+              Tổng tiền: <span className="text-blue-600">{totalPrice.toLocaleString()} đ</span>
             </p>
 
             <div className="mb-3">
-              <label className="text-1.5xl text-gray-800">Check-in</label>
+              <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">Check-in</span>
               <input
                 type="date"
-                className="w-full border rounded-lg p-2 mt-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-300"
+                className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-300"
               />
             </div>
 
-            <div className="flex justify-between items-center mb-3 mt-5">
-              <span className="text-1.5xl text-gray-800">Số người lớn</span>
-
-              <div className="flex items-center gap-2 text-gray-300">
-                {/* Nút trừ */}
-                <button
-                  onClick={() => setAdult(Math.max(0, adult - 1))}
-                  className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full hover:bg-gray-100
-                   active:bg-gray-200 transition-colors duration-200"
-                >
-                  −
-                </button>
-
-                {/* Số lượng */}
-                <span className="text-xl font-semibold w-6 text-center tabular-nums">
-                  {adult}
-                </span>
-
-                {/* Nút cộng */}
-                <button
-                  onClick={() => setAdult(adult + 1)}
-                  className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full hover:bg-gray-100
-                   active:bg-gray-200 transition-colors duration-200"
-                >
-                  +
-                </button>
+            {/* Số người lớn */}
+            <div className="flex justify-between items-center mb-4 mt-6">
+              <span className="text-lg text-gray-800">Số người lớn</span>
+              <div className="flex items-center gap-2 text-gray-600 ">
+                <button onClick={() => setAdult(Math.max(0, adult - 1))} className="w-8 h-8 flex items-center justify-center text-xl border 
+                border-gray-300 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">−</button>
+                <span className="text-xl font-semibold w-8 text-center">{adult}</span>
+                <button onClick={() => setAdult(adult + 1)} className="w-8 h-8 flex items-center justify-center text-xl border
+                 border-gray-300 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">+</button>
               </div>
             </div>
 
-            <div className="flex justify-between items-center mb-4 mt-4 text-gray-300">
-              <span className="text-1.5xl text-gray-800">Số trẻ em</span>
-
-              <div className="flex items-center gap-2">
-                {/* Nút trừ */}
-                <button
-                  onClick={() => setChild(Math.max(0, child - 1))}
-                  className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full hover:bg-gray-100
-                   active:bg-gray-200  transition-colors duration-200"
-                >
-                  −
-                </button>
-
-                {/* Số lượng */}
-                <span className="text-xl font-semibold w-6 text-center tabular-nums">
-                  {child}
-                </span>
-
-                {/* Nút cộng */}
-                <button
-                  onClick={() => setChild(child + 1)}
-                  className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full hover:bg-gray-100
-                   active:bg-gray-200  transition-colors duration-200"
-                >
-                  +
-                </button>
+            {/* Số trẻ em */}
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-lg text-gray-800">Số trẻ em</span>
+              <div className="flex items-center gap-2 text-gray-600">
+                <button onClick={() => setChild(Math.max(0, child - 1))} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 
+                rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">−</button>
+                <span className="text-xl font-semibold w-8 text-center">{child}</span>
+                <button onClick={() => setChild(child + 1)} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full
+                 hover:bg-gray-100 active:bg-gray-200 transition-all">+</button>
               </div>
             </div>
 
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-full mt-4">
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
               ĐẶT NGAY
             </button>
           </div>
@@ -285,50 +291,50 @@ function BookingContent() {
           {/* ===== Tổng quan ===== */}
           <div className="flex flex-col md:flex-row gap-10 mb-10">
 
-  {/* Điểm trung bình */}
-  <div>
-    <div className="text-6xl font-bold text-gray-900">
-      {averageRating.toFixed(1)}
-    </div>
+            {/* Điểm trung bình */}
+            <div>
+              <div className="text-6xl font-bold text-gray-900">
+                {averageRating.toFixed(1)}
+              </div>
 
-    <div className="flex text-yellow-400 text-2xl mt-1">
-      {"★".repeat(Math.floor(averageRating))}
-      {averageRating % 1 >= 0.5 && "★"}
-      {"☆".repeat(5 - Math.ceil(averageRating))}
-    </div>
+              <div className="flex text-yellow-400 text-2xl mt-1">
+                {"★".repeat(Math.floor(averageRating))}
+                {averageRating % 1 >= 0.5 && "★"}
+                {"☆".repeat(5 - Math.ceil(averageRating))}
+              </div>
 
-    <p className="text-blue-600 mt-1 font-medium">
-      {review.list.length} đánh giá
-    </p>
-  </div>
+              <p className="text-blue-600 mt-1 font-medium">
+                {review.list.length} đánh giá
+              </p>
+            </div>
 
-  {/* Thanh phần trăm theo số sao */}
-  <div className="flex-1 space-y-3 mt-3">
-    {[5, 4, 3, 2, 1].map((star) => {
-      const count = review.list.filter(r => r.rating === star).length;
-      const percent = review.list.length > 0 
-        ? Math.round((count / review.list.length) * 100) 
-        : 0;
+            {/* Thanh phần trăm theo số sao */}
+            <div className="flex-1 space-y-3 mt-3">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = review.list.filter(r => r.rating === star).length;
+                const percent = review.list.length > 0
+                  ? Math.round((count / review.list.length) * 100)
+                  : 0;
 
-      return (
-        <div key={star} className="flex items-center gap-3">
-          <span className="w-3 text-sm text-gray-600 font-medium">
-            {star}
-          </span>
-          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-yellow-400 transition-all duration-300"
-              style={{ width: `${percent}%` }}
-            />
+                return (
+                  <div key={star} className="flex items-center gap-3">
+                    <span className="w-3 text-sm text-gray-600 font-medium">
+                      {star}
+                    </span>
+                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-yellow-400 transition-all duration-300"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500 w-8 text-right">
+                      {percent}%
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <span className="text-xs text-gray-500 w-8 text-right">
-            {percent}%
-          </span>
-        </div>
-      );
-    })}
-  </div>
-</div>
 
           {/* ===== List review ===== */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="reviews-container">

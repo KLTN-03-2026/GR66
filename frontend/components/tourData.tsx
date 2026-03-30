@@ -86,7 +86,7 @@ export const tourData = {
     {
       id: 2,
       title: "Dịch vụ thêm: Nơi ở",
-      description: "Khách sạn tiêu chuẩn 2-3 khách/phòng",
+      description: "Khách sạn tiêu chuẩn 1 khách/phòng",
       price: 300000,
     },
   ],
