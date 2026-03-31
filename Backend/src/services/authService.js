@@ -1,7 +1,10 @@
 import bcrypt from 'bcrypt';
 import User from '../models/users.js';
 import GoogleAuthLib, { OAuth2Client } from 'google-auth-library'
-
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import Session from '../models/session.js';
+import { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from "../constants/Auth.js";
 
 // Đăng kí băng email và mật khẩu
 export const signUpService = async (data) => {
@@ -48,13 +51,29 @@ export const logincServices = async (data) => {
     if (!isMatch) {
         throw new Error("Email hoặc mật khẩu không đúng");
     }
-    // Trả dữ liệu user
+    // Nếu khớp , tạo access token ( debug)
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
+    // Nếu khớp , tạo access token
+    const  accessToken = jwt.sign({userId: user._id,}, process.env.JWT_SECRET, {expiresIn: ACCESS_TOKEN_TTL});
+    // tạo refresh token
+    const refreshToken = crypto.randomBytes(64).toString('hex');  // tạo token ngẫu nhiên
+    // tạo session lưu refresh token vào db
+    await Session.create({
+        userID: user._id,  // lưu ý đoạn này
+        refreshToken,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
+    })
+    // trả refresh token và access token về cho client ==> phần này code bên controller
     const userData = user.toObject();
     delete userData.matkhau;
-    return userData;
+    // Trả về access token và thông tin user (không bao gồm mật khẩu)
+    return { accessToken, refreshToken, user: userData };
+    // Trả dữ liệu user
+    // const userData = user.toObject();
+    // delete userData.matkhau;
+    // return userData;
 }
-
-// Đăng nhập với google
+// Đăng nhập hoặc đăng ký với google
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const loginGoogle = async (token) => {
     const ticket = await client.verifyIdToken({
@@ -70,7 +89,7 @@ export const loginGoogle = async (token) => {
     }
     
     // Kiểm tra user và lưu vào db
-    let user = await User.findOne({ googleId: userData.googleId });
+    let user = await User.findOne({ email: userData.email });
     if (!user) {
         user = await User.create({
             hoten: userData.name,
@@ -86,4 +105,18 @@ export const loginGoogle = async (token) => {
             await user.save();
         }
     }
+    return user;
 }
+
+// Đăng xuất
+export const logoutService = async (refreshToken) => {
+    if(refreshToken){
+        // Xóa session khỏi database
+        await Session.deleteOne({ refreshToken });
+        //xóa cookie refresh token
+        res.clearCookie("refreshToken");
+    }
+    return res.status(204);
+}
+
+

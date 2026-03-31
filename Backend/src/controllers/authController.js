@@ -1,4 +1,5 @@
-import { signUpService , logincServices , loginGoogle } from "../services/authService.js";
+import { signUpService , logincServices , loginGoogle ,logoutService} from "../services/authService.js";
+import {REFRESH_TOKEN_TTL} from "../constants/Auth.js";
 
 export const signupController = async(req, res) => {
     try {
@@ -19,10 +20,18 @@ export const signupController = async(req, res) => {
 
 export const loginController = async (req, res) => {
     try{
-        const user = await logincServices(req.body);
+        const { accessToken, refreshToken, user } = await logincServices(req.body);
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: false, // dev
+            sameSite: "lax",
+            maxAge: REFRESH_TOKEN_TTL,
+        });
         return res.status(200).json({
             success: true,
             message: "Đăng nhập thành công",
+            accessToken,
             user
         })
     } catch (err) {
@@ -54,6 +63,39 @@ export const loginWithGoogle = async (req, res) => {
     }
 }
 
+// Đăng xuất
+export const logoutController = async (req, res) => {
+     try {
+        const token  = req.cookies?.refreshToken;
+        return res.status(201).json({
+            success: true,
+            message: "Đăng xuất thành công",
+            user
+        })
+    }catch(err){
+        const status = err.status || 400;
+        return res.status(status).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+//JWT
+export const authMe = async (req, res) => {
+    try {
+        const user = req.user; // thông tin user đã được middleware xác thực gắn vào req
+        return res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.error("Lỗi khi gọi authMw", error);
+        res.status(500).json({
+            message: "Lỗi hệ thống"
+        });
+    }
+}
 
 
 
