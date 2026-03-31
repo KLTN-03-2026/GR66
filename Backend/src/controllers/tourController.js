@@ -1,88 +1,166 @@
-import {
-    getTours,
-    getTourById,
-    createTour,
-    updateTour,
-    deleteTour,
-    searchTour,
-    toggleTrangThai
-} from "../services/tourService.js";
+import TourService from "../services/tourService.js";
 
-// GET list
-export const getToursController = async (req, res) => {
+class TourController {
+  static async getAllTours(req, res) {
     try {
-        const { page, limit } = req.query;
-        const data = await getTours(page, limit);
-        res.json(data);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
-    }
-};
+      const tours = await TourService.getAllTours(req.query);
 
-// GET detail
-export const getTourController = async (req, res) => {
-    try {
-        const tour = await getTourById(req.params.id);
-        res.json(tour);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
+      return res.status(200).json({
+        success: true,
+        message: "Lấy danh sách tour thành công",
+        data: tours,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
     }
-};
+  }
 
-// POST
-export const createTourController = async (req, res) => {
+  static async getTourById(req, res) {
     try {
-        const tour = await createTour(req.body);
-        res.json(tour);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
-    }
-};
+      const { id } = req.params;
+      const tour = await TourService.getTourById(id);
 
-// PUT
-export const updateTourController = async (req, res) => {
-    try {
-        const tour = await updateTour(req.params.id, req.body);
-        res.json(tour);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
-    }
-};
+      return res.status(200).json({
+        success: true,
+        message: "Lấy chi tiết tour thành công",
+        data: tour,
+      });
+    } catch (error) {
+      const statusCode = error.message === "Không tìm thấy tour" ? 404 : 500;
 
-// DELETE
-export const deleteTourController = async (req, res) => {
-    try {
-        await deleteTour(req.params.id);
-        res.json({ message: "Xoá thành công" });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
     }
-};
+  }
 
-// SEARCH
-export const searchTourController = async (req, res) => {
+  static async createTour(req, res) {
     try {
-        const keyword = req.query.q || "";
-        const tours = await searchTour(keyword);
-        res.json(tours);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
-    }
-};
+      const { maTour, tenTour, thoiLuong, gia, trangThai } = req.body;
 
-// TOGGLE
-export const toggleTrangThaiController = async (req, res) => {
-    try {
-        const tour = await toggleTrangThai(req.params.id);
-        res.json(tour);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
+      if (!maTour || !tenTour || !thoiLuong || gia === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: "Mã tour, tên tour, thời lượng và giá là bắt buộc",
+        });
+      }
+
+      if (trangThai && !["Hoạt động", "Ngưng"].includes(trangThai)) {
+        return res.status(400).json({
+          success: false,
+          message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
+        });
+      }
+
+      const newTour = await TourService.createTour(req.body);
+
+      return res.status(201).json({
+        success: true,
+        message: "Thêm tour thành công",
+        data: newTour,
+      });
+    } catch (error) {
+      const statusCode = error.message === "Mã tour đã tồn tại" ? 400 : 500;
+
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
     }
-};
+  }
+
+  static async updateTour(req, res) {
+    try {
+      const { id } = req.params;
+      const { trangThai } = req.body;
+
+      if (trangThai && !["Hoạt động", "Ngưng"].includes(trangThai)) {
+        return res.status(400).json({
+          success: false,
+          message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
+        });
+      }
+
+      const updatedTour = await TourService.updateTour(id, req.body);
+
+      return res.status(200).json({
+        success: true,
+        message: "Cập nhật tour thành công",
+        data: updatedTour,
+      });
+    } catch (error) {
+      const statusCode =
+        error.message === "Không tìm thấy tour"
+          ? 404
+          : error.message === "Mã tour đã tồn tại"
+          ? 400
+          : 500;
+
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async deleteTour(req, res) {
+    try {
+      const { id } = req.params;
+      await TourService.deleteTour(id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Xóa tour thành công",
+      });
+    } catch (error) {
+      const statusCode = error.message === "Không tìm thấy tour" ? 404 : 500;
+
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async updateTourStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { trangThai } = req.body;
+
+      if (!trangThai) {
+        return res.status(400).json({
+          success: false,
+          message: "Trạng thái tour là bắt buộc",
+        });
+      }
+
+      if (!["Hoạt động", "Ngưng"].includes(trangThai)) {
+        return res.status(400).json({
+          success: false,
+          message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
+        });
+      }
+
+      const updatedTour = await TourService.updateTourStatus(id, trangThai);
+
+      return res.status(200).json({
+        success: true,
+        message: "Cập nhật trạng thái tour thành công",
+        data: updatedTour,
+      });
+    } catch (error) {
+      const statusCode = error.message === "Không tìm thấy tour" ? 404 : 500;
+
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
+export default TourController;

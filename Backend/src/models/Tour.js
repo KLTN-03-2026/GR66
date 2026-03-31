@@ -1,56 +1,100 @@
 import mongoose from "mongoose";
 
-const tourSchema = new mongoose.Schema(
+const dichVuThemSchema = new mongoose.Schema(
   {
-    matour: {
-      type: String,
-      trim: true,
-    },
-
-    tentour: {
+    tenDichVu: {
       type: String,
       required: true,
       trim: true,
     },
-
-    hinhnpmanh: {
+    thongTin: {
       type: String,
+      default: "",
+      trim: true,
     },
-
-    mota: {
-      type: String,
-    },
-
-    diadiem: {
-      type: String,
-    },
-
     gia: {
       type: Number,
       required: true,
-    },
-
-    thoigian: {
-      type: String, // ví dụ: 2 ngày 1 đêm
-    },
-
-    ngayketthuc: {
-      type: Date,
-    },
-
-    trangthai: {
-      type: Boolean,
-      default: true, // true = hoạt động, false = ngưng
+      min: 0,
     },
   },
   {
-    timestamps: {
-      createdAt: "thoigiantao",
-      updatedAt: "thoigiancapnhat",
-    },
+    _id: true,
   }
 );
 
-const Tour = mongoose.model("Tours", tourSchema);
+const tourSchema = new mongoose.Schema(
+  {
+    maTour: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    tenTour: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    thoiLuong: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    gia: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    diemNoiBat: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    loTrinh: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    chiTietDichVu: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    dieuKhoan: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    hinhAnh: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    ngayKhoiHanh: {
+      type: Date,
+      default: null,
+    },
+    ngayKetThuc: {
+      type: Date,
+      default: null,
+    },
+    trangThai: {
+      type: String,
+      enum: ["Hoạt động", "Ngưng"],
+      default: "Ngưng",
+    },
+    dichVuThem: {
+      type: [dichVuThemSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+
+const Tour = mongoose.model("Tour", tourSchema);
 
 export default Tour;
