@@ -5,14 +5,31 @@ import { useState } from "react";
 import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useEffect } from "react";
+
 
 
 /* ============ MAIN CONTENT ============ */
 function BookingContent() {
+  const [showFullTerms, setShowFullTerms] = useState(false);
+  const [showFullItinerary, setShowFullItinerary] = useState(false);
   const [adult, setAdult] = useState(0);
   const [child, setChild] = useState(0);
   const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkInError, setCheckInError] = useState("");
+  const today = new Date().toISOString().split("T")[0];
+  const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDate = e.target.value;
+
+    if (selectedDate < today) {
+      setCheckInError("Không thể chọn ngày trước hôm nay");
+      setCheckInDate("");
+      return;
+    }
+
+    setCheckInError("");
+    setCheckInDate(selectedDate);
+  };
 
   const toggleExtra = (id: number, price?: number) => {
     if (selectedExtras.includes(id)) {
@@ -121,55 +138,29 @@ function BookingContent() {
                 Lộ trình
               </h2>
 
-              <p className="text-gray-700 font-medium mb-3">
-                {tourData.itinerary.title}
-              </p>
-
-              {/* Phần hiển thị lộ trình với giới hạn */}
-              <ul className="text-sm text-gray-600 space-y-1 overflow-hidden" id="itinerary-list">
-                {tourData.itinerary.schedule.map((item, index) => (
-                  <li
-                    key={index}
-                    className={index >= 5 ? "hidden" : ""}   // Ẩn từ dòng thứ 6 trở đi
-                  >
-                    {item}
-                  </li>
+              <ul className="text-sm text-gray-600 space-y-1 overflow-hidden">
+                {(showFullItinerary
+                  ? tourData.itinerary
+                  : tourData.itinerary.slice(0, 5)
+                ).map((item, index) => (
+                  <li key={index}>{item}</li>
                 ))}
               </ul>
 
-              {/* Nút Xem thêm / Thu gọn */}
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={() => {
-                    const list = document.getElementById('itinerary-list');
-                    const button = document.querySelector('#itinerary-button span');
-
-                    if (list) {
-                      const hiddenItems = list.querySelectorAll('li.hidden');
-                      if (hiddenItems.length > 0) {
-                        // Hiển thị tất cả
-                        hiddenItems.forEach(item => item.classList.remove('hidden'));
-                        if (button) button.textContent = 'Thu gọn ↑';
-                      } else {
-                        // Ẩn bớt, chỉ giữ 5 dòng
-                        const allItems = list.querySelectorAll('li');
-                        allItems.forEach((item, idx) => {
-                          if (idx >= 5) item.classList.add('hidden');
-                        });
-                        if (button) button.textContent = 'Xem thêm →';
-                      }
-                    }
-                  }}
-                  id="itinerary-button"
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white 
-                 rounded-3xl text-sm font-medium flex items-center gap-2 
-                 transition-all active:scale-95"
-                >
-                  <span>Xem thêm →</span>
-                </button>
-              </div>
+              {tourData.itinerary.length > 5 && (
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => setShowFullItinerary(!showFullItinerary)}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl text-sm 
+                    font-medium flex items-center gap-2 transition-all active:scale-95"
+                  >
+                    <span>{showFullItinerary ? "Thu gọn ↑" : "Xem thêm →"}</span>
+                  </button>
+                </div>
+              )}
             </div>
             {/* ITINERARY end -------------------------------------------------------------------- */}
+
 
 
             <div className="space-y-6">
@@ -209,7 +200,7 @@ function BookingContent() {
 
                     <button
                       onClick={() => toggleExtra(service.id, service.price)}
-                      className={`px-6 py-2 text-sm font-medium rounded-full transition-all ${isSelected
+                      className={`px-6 py-2 mt-14 text-sm font-medium rounded-full transition-all ${isSelected
                         ? "bg-green-600 hover:bg-green-700 text-white"
                         : "bg-blue-500 hover:bg-blue-600 text-white"
                         }`}
@@ -219,8 +210,43 @@ function BookingContent() {
                   </div>
                 );
               })}
-
             </div>
+
+
+            {/*============= ĐIỀU KHOẢN ===========================================*/}
+            <div className="bg-white rounded-xl p-5 shadow-sm">
+              <h2 className="font-semibold text-lg text-gray-800 mb-3">
+                Điều khoản sử dụng
+              </h2>
+
+              <div className="text-sm text-gray-600 space-y-3">
+                <div>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {(showFullTerms
+                      ? tourData.terms
+                      : tourData.terms.slice(0, 4)
+                    ).map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {tourData.terms.length > 4 && (
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => setShowFullTerms(!showFullTerms)}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
+                  >
+                    <span>{showFullTerms ? "Thu gọn ↑" : "Xem thêm →"}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+
+
+
           </div>
           {/* ===== LEFT end ===================================================================================================================== */}
 
@@ -235,11 +261,20 @@ function BookingContent() {
             </p>
 
             <div className="mb-3">
-              <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">Check-in</span>
+              <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">
+                Check-in
+              </span>
               <input
                 type="date"
-                className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-300"
+                value={checkInDate}
+                min={today}
+                onChange={handleCheckInChange}
+                className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-500"
               />
+
+              {checkInError && (
+                <p className="text-red-500 text-sm mt-2">{checkInError}</p>
+              )}  
             </div>
 
             {/* Số người lớn */}

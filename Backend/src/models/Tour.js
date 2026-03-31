@@ -13,7 +13,7 @@ const tourSchema = new mongoose.Schema(
       trim: true,
     },
 
-    hinhanh: {
+    hinhnpmanh: {
       type: String,
     },
 

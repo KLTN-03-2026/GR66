@@ -23,44 +23,18 @@ export const tourData = {
     ],
   },
 
-  itinerary: {
-    title: "Ngày 1: Di chuyển - trekking - cắm trại",
-    schedule: [
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-      "07:00 - 12:00: Di chuyển",
-      "13:30: Ăn trưa",
-      "Chiều: trekking",
-      "Tối: nghỉ ngơi",
-    ],
-  },
-
+  itinerary: [
+    "Ngày 1: Di chuyển - trekking - cắm trại",
+    "07:00 - 12:00: Di chuyển",
+    "13:30: Ăn trưa",
+    "Chiều: trekking",
+    "Tối: nghỉ ngơi",
+    "Ngày 2: Di chuyển - trekking - cắm trại",
+    "07:00 - 12:00: Di chuyển",
+    "13:30: Ăn trưa",
+    "Chiều: trekking",
+    "Tối: nghỉ ngơi",
+  ],
   price: 0,
 
   // ✅ DỊCH VỤ BAO GỒM
@@ -175,6 +149,19 @@ export const tourData = {
         content:
           "View đẹp, chụp ảnh cực chill.",
       },
+
     ],
   },
+  
+  terms: [
+    "Xe tham quan (15, 25, 35, 45 chỗ tùy số lượng khách)",
+    "Hành lý ký gửi: 20kg, xách tay 7kg/1 khách",
+    "Ăn theo chương trình (set menu)",
+    "Vé tham quan theo chương trình",
+    "Hướng dẫn viên tiếng Việt",
+    "Bảo hiểm du lịch tối đa 120.000.000đ/vụ",
+    "Nón Vietravel + Nước suối + Khăn lạnh",
+    "Thuế VAT",
+    "Khi chọn vào dịch vụ thêm, thì người bên phía nhà cung cấp sẽ chọn các dịch vụ sau đó xác nhận lại với phía khách hàng sau",
+  ]
 };
