@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+    ngaysinh:  {
+      type: Date,
+    },
 
     matkhau: {
       type: String,
@@ -57,6 +60,5 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("Users", userSchema);
-
-export default User;
+const Users = mongoose.models.Users || mongoose.model("Users", userSchema);
+export default Users;
