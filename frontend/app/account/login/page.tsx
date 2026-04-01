@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { handleGoogleSuccess, handleEmailLogin, handleGoogleError } from '@/app/lib/authService';
+import { handleGoogleSuccess, handleEmailLogin, handleGoogleError , getUserProfile } from '@/app/lib/authService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -148,7 +148,10 @@ export default function LoginPage() {
             </div>
 
             {/* Nút Đăng Nhập */}
-            <button
+            <button onClick={async () => {
+              const data = await getUserProfile();
+              console.log(data);
+            }}
               type="submit"
               disabled={loading}
               className="mt-1 w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-medium py-4 rounded-2xl transition text-lg"

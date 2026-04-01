@@ -85,7 +85,6 @@ export const handleEmailSignup = async (
 }
 
 
-debugger
 // đăng nhập bằng email và mật khẩu
 export const handleEmailLogin = async (
   email: string,
@@ -116,6 +115,7 @@ export const handleEmailLogin = async (
      // alert ("Đăng nhập thành công");
       console.log("Đăng nhập thành công:", data);
     if(data.success){
+        localStorage.setItem("accessToken", data.accessToken);
         window.location.href = "/";
     }
       // TODO: Lưu token và redirect làm sau
@@ -123,6 +123,8 @@ export const handleEmailLogin = async (
       alert(data.message || "Đăng nhập thất bại");
       throw new Error(data.message || "Login failed");
     }
+
+    
   } catch (err) {
     console.error("Login failed:", err);
   } 
@@ -131,3 +133,22 @@ export const handleEmailLogin = async (
 export const handleGoogleError =   () => {
   alert("Không có quyền truy cập");
 };
+
+
+// JSON WEB TOKEN 
+export const getUserProfile = async () => {
+  console.log("getUserProfile đã được gọi");
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch("http://localhost:3001/api/users/me", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const data = await res.json();
+  return data;
+};
+
