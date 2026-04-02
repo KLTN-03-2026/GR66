@@ -1,10 +1,26 @@
 "use client";
-
-import React from 'react';
+import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
+import { checkTokenExpiration } from "@/app/lib/authService";
 
 export default function IntroSection() {
+  const [user, setUser] = useState<{ email: string } | null>(null);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const accessToken = localStorage.getItem("accessToken");
+    if (storedUser && accessToken) {
+      setUser(JSON.parse(storedUser));
+    checkTokenExpiration();
+
+    } else {
+      // nếu thiếu 1 trong 2 → coi như chưa login
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      setUser(user);
+    }
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Video */}
@@ -34,11 +50,11 @@ export default function IntroSection() {
             <div className="text-2xl text-blue-400 font-bold tracking-wider">DTU_TRAVEL</div>
             <div className="relative -mt-7">
               <Image
-                src="/logo.png"           
+                src="/logo.png"
                 alt="DTU Travel Logo"
-                width={100}               
+                width={100}
                 height={50}
-                className="h-20 w-auto"   
+                className="h-20 w-auto"
                 priority
               />
             </div>
@@ -56,25 +72,36 @@ export default function IntroSection() {
             <a href="#" className="hover:text-blue-300 transition">Thông tin cá nhân</a>
           </nav>
 
-          <Link 
-            href="/account/register"
-            className="px-6 py-2 border border-white rounded-full hover:bg-white hover:text-black transition text-sm"
-          >
-            Đăng ký
-          </Link>
 
-          <Link 
-            href="/account/login"
-            className="px-6 py-2 bg-white text-black rounded-full hover:bg-blue-600 hover:text-white transition text-sm"
-          >
-            Đăng nhập
-          </Link>
+          {user ? (
+            //Nếu đã đăng nhập
+            <span className="text-white text-sm">
+              {user.email}
+            </span>
+          ) : (
+            // Nếu chưa đăng nhập
+            <>
+              <Link
+                href="/account/register"
+                className="px-6 py-2 border border-white rounded-full hover:bg-white hover:text-black transition text-sm"
+              >Đăng ký
+              </Link>
+
+              <Link
+                href="/account/login"
+                className="px-6 py-2 bg-white text-black rounded-full hover:bg-blue-600 hover:text-white transition text-sm"
+              >
+                Đăng nhập
+              </Link>
+            </>
+          )}
+
         </div>
       </header>
 
       {/* Nội dung chính */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6 pt-8">   {/* Giảm pt để dịch lên */}
-        
+
         {/* Tiêu đề - Chỉ dịch lên cao hơn, không thay đổi font size */}
         <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-thin tracking-wider leading-none mb-10">
           Những hành trình
