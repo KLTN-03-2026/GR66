@@ -1,13 +1,12 @@
 import bcrypt from 'bcrypt';
-
-import User from '../models/Users.js';
+import User from '../models/users.js';
 import GoogleAuthLib, { OAuth2Client } from 'google-auth-library'
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import Session from '../models/session.js';
 import { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from "../constants/Auth.js";
 
-
+// Đăng kí băng email và mật khẩu
 export const signUpService = async (data) => {
     const { role, hoten, email, matkhau, sdt, gioitinh, diachi, ngaysinh } = data;
     if (!role || !hoten || !email || !matkhau || !sdt || !gioitinh || !diachi || !ngaysinh) {
@@ -35,7 +34,6 @@ export const signUpService = async (data) => {
     })
     return newUser
 }
-
 
 //Đăng nhập bằnhg email và mật khẩu\
 export const logincServices = async (data) => {
@@ -76,7 +74,6 @@ export const logincServices = async (data) => {
     // return userData;
 }
 // Đăng nhập hoặc đăng ký với google
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const loginGoogle = async (token) => {
     const ticket = await client.verifyIdToken({
@@ -108,7 +105,6 @@ export const loginGoogle = async (token) => {
             await user.save();
         }
     }
-
     return user;
 }
 
@@ -122,4 +118,5 @@ export const logoutService = async (refreshToken) => {
     }
     return res.status(204);
 }
+
 

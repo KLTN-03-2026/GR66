@@ -1,12 +1,9 @@
-
 import { signUpService , logincServices , loginGoogle ,logoutService} from "../services/authService.js";
 import {REFRESH_TOKEN_TTL} from "../constants/Auth.js";
 
-// Đăng ký
-export const signupController = async (req, res) => {
+export const signupController = async(req, res) => {
     try {
-        await signUpService(req.body);
-
+        const user = await signUpService(req.body)
         return res.status(201).json({
             success: true,
             message: "Đăng kí thành công",
@@ -17,9 +14,10 @@ export const signupController = async (req, res) => {
         return res.status(status).json({
             success: false,
             message: err.message
-        });
+        })
     }
-};
+}
+
 export const loginController = async (req, res) => {
     try{
         const { accessToken, refreshToken, user } = await logincServices(req.body);
@@ -43,26 +41,27 @@ export const loginController = async (req, res) => {
 
     }
 }
+
 export const loginWithGoogle = async (req, res) => {
-    try {
-        const { token } = req.body;
+   try{
+        const { token } = req.body
 
+        // Gọi hàm xử lý logic (đảm bảo hàm này trả về Object)
         const userData = await loginGoogle(token);
-
+        // Trả về json để Frontend không bị lỗi SyntaxError
         return res.status(200).json({
             success: true,
             user: userData
         });
 
-    } catch (err) {
+    }catch(err){
         console.error("Lỗi tại Backend:", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
+        return res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error" 
         });
     }
-};
+}
 
 // Đăng xuất
 export const logoutController = async (req, res) => {
@@ -97,4 +96,10 @@ export const authMe = async (req, res) => {
         });
     }
 }
+
+
+
+
+
+
 

@@ -1,7 +1,6 @@
 import express from "express";
 import { signupController,loginWithGoogle,loginController, logoutController } from "../controllers/authController.js";
 
-
 const router = express.Router();
 
 router.post("/signup", signupController) // đang kí với email và mật khẩu
