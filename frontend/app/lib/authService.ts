@@ -1,7 +1,6 @@
 import { CredentialResponse } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 
-
 //Đăng ký , đăng nhập bằng gg
 export const handleGoogleSuccess = async (credentialResponse: CredentialResponse,) => {
   console.log("Đăng nhập google thành công", credentialResponse);
@@ -14,16 +13,11 @@ export const handleGoogleSuccess = async (credentialResponse: CredentialResponse
       },
       body: JSON.stringify({ token }),
     });
-
     const data = await res.json();
     console.log("Server response:", data);
-    // TODO: Lưu token và redirect làm sau
-
     if(data.success){
-      const token = localStorage.setItem("accessToken", data.user.accessToken);
-      
+      localStorage.setItem("accessToken", data.user.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user.user));
-
       window.location.href = "/";
     }
 
@@ -86,7 +80,6 @@ export const handleEmailSignup = async (
   }
 }
 
-
 // đăng nhập bằng email và mật khẩu
 export const handleEmailLogin = async (
   email: string,
@@ -131,10 +124,10 @@ export const handleEmailLogin = async (
   } 
 };
 
+// Đăng nhập lỗi trên gg
 export const handleGoogleError =   () => {
   alert("Không có quyền truy cập");
 };
-
 
 // JSON WEB TOKEN 
 export const getUserProfile = async () => {
@@ -153,7 +146,7 @@ export const getUserProfile = async () => {
   return data;
 };
 
-
+// kiểm tra token đã hết hạn chưa, 
 export const checkTokenExpiration = () => {
   const token = localStorage.getItem("accessToken"); // lấy token từ local storage
   if (!token) return;  // nếu không có token thì không cần kiểm tra gì cả
@@ -171,5 +164,14 @@ export const checkTokenExpiration = () => {
     localStorage.removeItem("accessToken");
   }
 };
+
+// Đăng xuất:
+export const logout = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
+  window.location.href = "http://localhost:3000/account/login";   
+}
+
+
 
 

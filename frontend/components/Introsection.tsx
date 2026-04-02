@@ -2,22 +2,24 @@
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
-import { checkTokenExpiration } from "@/app/lib/authService";
+import { checkTokenExpiration, logout} from "@/app/lib/authService";
+import { useNavigate } from "react-router-dom";
 
 export default function IntroSection() {
   const [user, setUser] = useState<{ email: string } | null>(null);
+  const [open, setOpen] = useState(false);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const accessToken = localStorage.getItem("accessToken");
     if (storedUser && accessToken) {
       setUser(JSON.parse(storedUser));
-    checkTokenExpiration();
-
+      checkTokenExpiration();
     } else {
-      // nếu thiếu 1 trong 2 → coi như chưa login
+      // nếu thiếu 1 trong 2 coi như chưa login
       localStorage.removeItem("user");
       localStorage.removeItem("accessToken");
-      setUser(user);
+      setUser(null);
     }
   }, []);
 
@@ -75,9 +77,28 @@ export default function IntroSection() {
 
           {user ? (
             //Nếu đã đăng nhập
-            <span className="text-white text-sm">
-              {user.email}
-            </span>
+            <div className="relative">
+              {/* Email */}
+              <span
+                className="text-white text-sm bg-transparent cursor-pointer"
+                onClick={() => setOpen(!open)}
+              >
+                {user.email}
+              </span>
+
+              {/* Menu xổ xuống */}
+              {open && (
+                <div className="absolute right-0 mt-2 w-44 bg-white/20 backdrop-blur-md rounded shadow-lg">
+                  <button className="block w-full text-left px-4 py-2 text-white hover:bg-white/20">
+                    Thông tin tài khoản
+                  </button>
+
+                  <button  onClick={logout} className="block w-full text-left px-4 py-2 text-red-300 hover:bg-white/20">
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             // Nếu chưa đăng nhập
             <>
