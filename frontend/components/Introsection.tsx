@@ -27,6 +27,7 @@ export default function IntroSection() {
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Video */}
       <video
+        key="home-video"
         autoPlay
         muted
         loop
@@ -34,7 +35,7 @@ export default function IntroSection() {
         preload="auto"
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="VideoBanner.mp4" type="video/mp4" />
+        <source src="/VideoBanner.mp4" type="video/mp4" />
         <img
           src="/intro.jpg"
           alt="Exceptional journeys"
