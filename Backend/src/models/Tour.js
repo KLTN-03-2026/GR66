@@ -7,12 +7,22 @@ const dichVuThemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    thongTin: {
+    thongTinBaoGom: {
       type: String,
       default: "",
       trim: true,
     },
-    gia: {
+    thongTinKhongBaoGom: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    giaNguoiLon: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    giaTreEm: {
       type: Number,
       required: true,
       min: 0,
@@ -36,57 +46,79 @@ const tourSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
+    diaDiemTour: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    hinhAnh: {
+      type: [String],
+      default: [],
+    },
+
     thoiLuong: {
       type: String,
       required: true,
       trim: true,
     },
-    gia: {
+
+    giaNguoiLon: {
       type: Number,
       required: true,
       min: 0,
     },
+
+    giaTreEm: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
     diemNoiBat: {
       type: String,
       default: "",
       trim: true,
     },
+
     loTrinh: {
       type: String,
       default: "",
       trim: true,
     },
-    chiTietDichVu: {
+
+    chiTietDichVuKemTour: {
       type: String,
       default: "",
       trim: true,
     },
-    dieuKhoan: {
+
+    dieuKhoanDichVu: {
       type: String,
       default: "",
       trim: true,
     },
-    hinhAnh: {
-      type: String,
-      default: "",
-      trim: true,
+
+    dichVuThem: {
+      type: [dichVuThemSchema],
+      default: [],
     },
+
     ngayKhoiHanh: {
       type: Date,
       default: null,
     },
+
     ngayKetThuc: {
       type: Date,
       default: null,
     },
+
     trangThai: {
       type: String,
       enum: ["Hoạt động", "Ngưng"],
       default: "Ngưng",
-    },
-    dichVuThem: {
-      type: [dichVuThemSchema],
-      default: [],
     },
   },
   {

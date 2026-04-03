@@ -8,6 +8,7 @@ class TourService {
       filter.$or = [
         { maTour: { $regex: query.keyword, $options: "i" } },
         { tenTour: { $regex: query.keyword, $options: "i" } },
+        { diaDiemTour: { $regex: query.keyword, $options: "i" } },
       ];
     }
 
@@ -38,13 +39,15 @@ class TourService {
     const newTour = await Tour.create({
       maTour: data.maTour,
       tenTour: data.tenTour,
+      diaDiemTour: data.diaDiemTour,
+      hinhAnh: Array.isArray(data.hinhAnh) ? data.hinhAnh : [],
       thoiLuong: data.thoiLuong,
-      gia: data.gia,
+      giaNguoiLon: data.giaNguoiLon,
+      giaTreEm: data.giaTreEm,
       diemNoiBat: data.diemNoiBat || "",
       loTrinh: data.loTrinh || "",
-      chiTietDichVu: data.chiTietDichVu || "",
-      dieuKhoan: data.dieuKhoan || "",
-      hinhAnh: data.hinhAnh || "",
+      chiTietDichVuKemTour: data.chiTietDichVuKemTour || "",
+      dieuKhoanDichVu: data.dieuKhoanDichVu || "",
       ngayKhoiHanh: data.ngayKhoiHanh || null,
       ngayKetThuc: data.ngayKetThuc || null,
       trangThai: data.trangThai || "Ngưng",
@@ -75,13 +78,19 @@ class TourService {
         $set: {
           maTour: data.maTour ?? currentTour.maTour,
           tenTour: data.tenTour ?? currentTour.tenTour,
+          diaDiemTour: data.diaDiemTour ?? currentTour.diaDiemTour,
+          hinhAnh: Array.isArray(data.hinhAnh)
+            ? data.hinhAnh
+            : currentTour.hinhAnh,
           thoiLuong: data.thoiLuong ?? currentTour.thoiLuong,
-          gia: data.gia ?? currentTour.gia,
+          giaNguoiLon: data.giaNguoiLon ?? currentTour.giaNguoiLon,
+          giaTreEm: data.giaTreEm ?? currentTour.giaTreEm,
           diemNoiBat: data.diemNoiBat ?? currentTour.diemNoiBat,
           loTrinh: data.loTrinh ?? currentTour.loTrinh,
-          chiTietDichVu: data.chiTietDichVu ?? currentTour.chiTietDichVu,
-          dieuKhoan: data.dieuKhoan ?? currentTour.dieuKhoan,
-          hinhAnh: data.hinhAnh ?? currentTour.hinhAnh,
+          chiTietDichVuKemTour:
+            data.chiTietDichVuKemTour ?? currentTour.chiTietDichVuKemTour,
+          dieuKhoanDichVu:
+            data.dieuKhoanDichVu ?? currentTour.dieuKhoanDichVu,
           ngayKhoiHanh:
             data.ngayKhoiHanh !== undefined
               ? data.ngayKhoiHanh
@@ -91,7 +100,9 @@ class TourService {
               ? data.ngayKetThuc
               : currentTour.ngayKetThuc,
           trangThai: data.trangThai ?? currentTour.trangThai,
-          dichVuThem: data.dichVuThem ?? currentTour.dichVuThem,
+          dichVuThem: Array.isArray(data.dichVuThem)
+            ? data.dichVuThem
+            : currentTour.dichVuThem,
         },
       },
       {

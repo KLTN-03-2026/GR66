@@ -40,12 +40,28 @@ class TourController {
 
   static async createTour(req, res) {
     try {
-      const { maTour, tenTour, thoiLuong, gia, trangThai } = req.body;
+      const {
+        maTour,
+        tenTour,
+        diaDiemTour,
+        thoiLuong,
+        giaNguoiLon,
+        giaTreEm,
+        trangThai,
+      } = req.body;
 
-      if (!maTour || !tenTour || !thoiLuong || gia === undefined) {
+      if (
+        !maTour ||
+        !tenTour ||
+        !diaDiemTour ||
+        !thoiLuong ||
+        giaNguoiLon === undefined ||
+        giaTreEm === undefined
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Mã tour, tên tour, thời lượng và giá là bắt buộc",
+          message:
+            "Mã tour, tên tour, địa điểm tour, thời lượng, giá người lớn và giá trẻ em là bắt buộc",
         });
       }
 
@@ -76,12 +92,26 @@ class TourController {
   static async updateTour(req, res) {
     try {
       const { id } = req.params;
-      const { trangThai } = req.body;
+      const { trangThai, giaNguoiLon, giaTreEm } = req.body;
 
       if (trangThai && !["Hoạt động", "Ngưng"].includes(trangThai)) {
         return res.status(400).json({
           success: false,
           message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
+        });
+      }
+
+      if (giaNguoiLon !== undefined && giaNguoiLon < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Giá người lớn phải lớn hơn hoặc bằng 0",
+        });
+      }
+
+      if (giaTreEm !== undefined && giaTreEm < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Giá trẻ em phải lớn hơn hoặc bằng 0",
         });
       }
 
