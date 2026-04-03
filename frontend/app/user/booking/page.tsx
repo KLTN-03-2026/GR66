@@ -12,12 +12,20 @@ import Footer from "@/components/Footer";
 function BookingContent() {
   const [showFullTerms, setShowFullTerms] = useState(false);
   const [showFullItinerary, setShowFullItinerary] = useState(false);
-  const [adult, setAdult] = useState(0);
+  const [adult, setAdult] = useState(1);
   const [child, setChild] = useState(0);
   const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
   const [checkInDate, setCheckInDate] = useState("");
   const [checkInError, setCheckInError] = useState("");
   const today = new Date().toISOString().split("T")[0];
+  const [expandedExtras, setExpandedExtras] = useState<number[]>([]);
+  const toggleExtraDetail = (id: number) => {
+    if (expandedExtras.includes(id)) {
+      setExpandedExtras((prev) => prev.filter((item) => item !== id));
+    } else {
+      setExpandedExtras((prev) => [...prev, id]);
+    }
+  };
   const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
 
@@ -31,26 +39,27 @@ function BookingContent() {
     setCheckInDate(selectedDate);
   };
 
-  const toggleExtra = (id: number, price?: number) => {
+  const toggleExtra = (id: number) => {
     if (selectedExtras.includes(id)) {
-      // bỏ dịch vụ
-      setSelectedExtras(prev => prev.filter(item => item !== id));
+      setSelectedExtras((prev) => prev.filter((item) => item !== id));
     } else {
-      // thêm dịch vụ
-      setSelectedExtras(prev => [...prev, id]);
+      setSelectedExtras((prev) => [...prev, id]);
     }
   };
-  const people = adult + child;
+  const baseAdultCount = adult > 0 ? adult : 1;
 
-  let extraTotal = 0;
+let extraTotal = 0;
 
-  tourData.extra.forEach(service => {
-    if (selectedExtras.includes(service.id)) {
-      extraTotal += service.price * people;
-    }
-  });
+tourData.extra.forEach((service) => {
+  if (selectedExtras.includes(service.id)) {
+    extraTotal += service.adultPrice * adult + service.childPrice * child;
+  }
+});
 
-  const totalPrice = tourData.price * people + extraTotal;
+const totalPrice =
+  tourData.adultPrice * baseAdultCount +
+  tourData.childPrice * child +
+  extraTotal;
 
   const review = tourData.reviewSection;
 
@@ -178,35 +187,101 @@ function BookingContent() {
               </div>
 
               {/* EXTRA SERVICES */}
+
               {tourData.extra.map((service) => {
                 const isSelected = selectedExtras.includes(service.id);
+                const isExpanded = expandedExtras.includes(service.id);
 
                 return (
                   <div
                     key={service.id}
-                    className="bg-white rounded-2xl p-5 shadow-sm border flex justify-between items-center"
+                    className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
                   >
+                    {/* PHẦN LUÔN HIỂN THỊ */}
                     <div>
-                      <h3 className="font-semibold text-gray-800 mb-2">
+                      <h3 className="font-semibold text-gray-800 mb-3">
                         {service.title}
                       </h3>
-                      <p className="text-sm text-gray-600">
-                        {service.description}
-                      </p>
-                      <p className="font-medium mt-2 text-red-500">
-                        Giá: {service.price.toLocaleString()} đ
-                      </p>
+
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium text-gray-800 mb-1">
+                          Thông tin dịch vụ thêm
+                        </p>
+
+                        <p
+                          className="overflow-hidden text-ellipsis"
+                          style={
+                            !isExpanded
+                              ? {
+                                display: "-webkit-box",
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: "vertical",
+                              }
+                              : {}
+                          }
+                        >
+                          {service.description}
+                        </p>
+                      </div>
                     </div>
 
-                    <button
-                      onClick={() => toggleExtra(service.id, service.price)}
-                      className={`px-6 py-2 mt-14 text-sm font-medium rounded-full transition-all ${isSelected
-                        ? "bg-green-600 hover:bg-green-700 text-white"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                    >
-                      {isSelected ? "Đã thêm ✓" : "Thêm"}
-                    </button>
+                    {/* PHẦN CHỈ HIỆN KHI BẤM XEM CHI TIẾT */}
+                    {isExpanded && (
+                      <>
+                        <div className="mt-5 space-y-3 text-sm text-gray-600">
+                          <div>
+                            <p className="font-medium text-gray-800 mb-1">
+                              Dịch vụ thêm không bao gồm
+                            </p>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {service.notIncluded.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+                          <div className="bg-gray-50 rounded-xl px-4 py-3 border">
+                            <p className="text-sm text-gray-500 mb-1">
+                              Giá dịch vụ đối với người lớn
+                            </p>
+                            <p className="font-semibold text-red-500">
+                              {service.adultPrice.toLocaleString()} đ
+                            </p>
+                          </div>
+
+                          <div className="bg-gray-50 rounded-xl px-4 py-3 border">
+                            <p className="text-sm text-gray-500 mb-1">
+                              Giá vé dịch vụ đối với trẻ em
+                            </p>
+                            <p className="font-semibold text-red-500">
+                              {service.childPrice.toLocaleString()} đ
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* 2 NÚT CÙNG MỘT HÀNG */}
+                    <div className="mt-[30px] flex justify-end gap-3">
+                      <button
+                        onClick={() => toggleExtraDetail(service.id)}
+                        className="px-5 py-2.5 text-sm font-medium rounded-full bg-gray-200 hover:bg-gray-300 text-black transition-all active:scale-95"
+                      >
+                        {isExpanded ? "Thu gọn" : "Xem chi tiết"}
+                      </button>
+
+                      <button
+                        onClick={() => toggleExtra(service.id)}
+                        className={`px-6 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
+                            ? "bg-green-600 hover:bg-green-700 text-white"
+                            : "bg-blue-500 hover:bg-blue-600 text-white"
+                          }`}
+                      >
+                        {isSelected ? "Đã thêm ✓" : "Thêm"}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -274,14 +349,14 @@ function BookingContent() {
 
               {checkInError && (
                 <p className="text-red-500 text-sm mt-2">{checkInError}</p>
-              )}  
+              )}
             </div>
 
             {/* Số người lớn */}
             <div className="flex justify-between items-center mb-4 mt-6">
               <span className="text-lg text-gray-800">Số người lớn</span>
               <div className="flex items-center gap-2 text-gray-600 ">
-                <button onClick={() => setAdult(Math.max(0, adult - 1))} className="w-8 h-8 flex items-center justify-center text-xl border 
+                <button onClick={() => setAdult(Math.max(1, adult - 1))} className="w-8 h-8 flex items-center justify-center text-xl border 
                 border-gray-300 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">−</button>
                 <span className="text-xl font-semibold w-8 text-center">{adult}</span>
                 <button onClick={() => setAdult(adult + 1)} className="w-8 h-8 flex items-center justify-center text-xl border
@@ -317,7 +392,6 @@ function BookingContent() {
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Đánh giá
           </h2>
-
           {/* ===== Tổng quan ===== */}
           <div className="flex flex-col md:flex-row gap-10 mb-10">
 

@@ -6,6 +6,7 @@ import tourRoute from './routes/tourRoute.js';
 import cors from 'cors'
 import userRoute from './routes/UserJwt.js';
 import { ProtetedRoute } from './middlewares/authMiddlewares.js';
+import manageuserRoute from "./routes/manageuserRoute.js";
 
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use('/api/tours', tourRoute);
 //private routes
 app.use(ProtetedRoute); // áp dụng middleware bảo vệ cho tất cả các route sau nó
 app.use('/api/users', userRoute);
+app.use("/api/manageuser", manageuserRoute);
 
 
 connectDB().then(() => {

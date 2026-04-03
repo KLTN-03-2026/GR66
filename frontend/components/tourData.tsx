@@ -35,7 +35,8 @@ export const tourData = {
     "Chiều: trekking",
     "Tối: nghỉ ngơi",
   ],
-  price: 0,
+  adultPrice: 1500000,
+  childPrice: 750000,
 
   // ✅ DỊCH VỤ BAO GỒM
   included: [
@@ -54,14 +55,26 @@ export const tourData = {
     {
       id: 1,
       title: "Dịch vụ thêm: Phương tiện di chuyển",
-      description: "Vé máy bay (SGN - DAD - SGN)",
-      price: 500000,
+      description: "Vé máy bay khứ hồi, hỗ trợ đặt chỗ theo lịch trình tour.",
+      notIncluded: [
+        "Hành lý quá cước",
+        "Phí đổi ngày bay",
+        "Phụ thu hạng ghế thương gia",
+      ],
+      adultPrice: 500000,
+      childPrice: 350000,
     },
     {
       id: 2,
       title: "Dịch vụ thêm: Nơi ở",
-      description: "Khách sạn tiêu chuẩn 1 khách/phòng",
-      price: 300000,
+      description: "Khách sạn tiêu chuẩn 1 khách/phòng, tiện nghi cơ bản đầy đủ.",
+      notIncluded: [
+        "Giặt ủi",
+        "Đồ uống minibar",
+        "Phụ thu trả phòng trễ",
+      ],
+      adultPrice: 300000,
+      childPrice: 200000,
     },
   ],
 
