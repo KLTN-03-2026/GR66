@@ -1,201 +1,97 @@
-import bcrypt from "bcrypt";
-import Users from "../models/users.js";
+import Users from "../models/Users.js";
 
-// Thống kê tài khoản
-export const getUserStatsService = async () => {
-  const now = new Date();
-
-  const startOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
-
-  const endOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1
-  );
-
-  const [tongSoTaiKhoan, taiKhoanHoatDong, taiKhoanDaKhoa, taiKhoanMoi] =
-    await Promise.all([
-      Users.countDocuments(),
-      Users.countDocuments({ trangthai: true }),
-      Users.countDocuments({ trangthai: false }),
-      Users.countDocuments({
-        thoigiantao: {
-          $gte: startOfDay,
-          $lt: endOfDay,
-        },
-      }),
-    ]);
-
-  return {
-    tongSoTaiKhoan,
-    taiKhoanHoatDong,
-    taiKhoanDaKhoa,
-    taiKhoanMoi,
-  };
-};
-
-// Lấy danh sách tài khoản + tìm kiếm + lọc + phân trang
-export const getAllUsersService = async (query) => {
-  const {
-    page = 1,
-    limit = 10,
-    keyword = "",
-    role = "",
-    trangthai = "",
-  } = query;
-
-  const filter = {};
-
-  if (keyword) {
-    filter.$or = [
-      { hoten: { $regex: keyword, $options: "i" } },
-      { email: { $regex: keyword, $options: "i" } },
-      { sdt: { $regex: keyword, $options: "i" } },
-      { diachi: { $regex: keyword, $options: "i" } },
-    ];
+class ManageUserService {
+  // 1. Lấy danh sách tất cả tài khoản
+  static async getAllUsers() {
+    const users = await Users.find().select("-matkhau").sort({ thoigiantao: -1 });
+    return users;
   }
 
-  if (role) {
-    filter.role = role;
-  }
+  // 2. Lấy chi tiết 1 tài khoản
+  static async getUserById(id) {
+    const user = await Users.findById(id).select("-matkhau");
 
-  if (trangthai !== "") {
-    filter.trangthai = trangthai === "true";
-  }
-
-  const currentPage = Number(page);
-  const pageSize = Number(limit);
-  const skip = (currentPage - 1) * pageSize;
-
-  const [users, total] = await Promise.all([
-    Users.find(filter)
-      .select("-matkhau")
-      .sort({ thoigiantao: -1 })
-      .skip(skip)
-      .limit(pageSize),
-    Users.countDocuments(filter),
-  ]);
-
-  return {
-    data: users,
-    pagination: {
-      page: currentPage,
-      limit: pageSize,
-      total,
-      totalPages: Math.ceil(total / pageSize),
-    },
-  };
-};
-
-// Lấy chi tiết 1 tài khoản
-export const getUserByIdService = async (id) => {
-  const user = await Users.findById(id).select("-matkhau");
-
-  if (!user) {
-    const err = new Error("Không tìm thấy tài khoản");
-    err.status = 404;
-    throw err;
-  }
-
-  return user;
-};
-
-// Tạo tài khoản mới
-export const createUserService = async (data) => {
-  const {
-    role,
-    hoten,
-    email,
-    matkhau,
-    sdt,
-    gioitinh,
-    diachi,
-    ngaysinh,
-  } = data;
-
-  if (!hoten || !email || !matkhau) {
-    const err = new Error("Thiếu dữ liệu bắt buộc");
-    err.status = 400;
-    throw err;
-  }
-
-  if (role && role !== "Admin" && role !== "Khach") {
-    const err = new Error("Role chỉ được là Admin hoặc Khach");
-    err.status = 400;
-    throw err;
-  }
-
-  const existUser = await Users.findOne({ email });
-  if (existUser) {
-    const err = new Error("Email đã tồn tại");
-    err.status = 409;
-    throw err;
-  }
-
-  const hashPassword = await bcrypt.hash(matkhau, 10);
-
-  const newUser = await Users.create({
-    role: role || "Khach",
-    hoten,
-    email,
-    matkhau: hashPassword,
-    sdt,
-    gioitinh,
-    diachi,
-    ngaysinh,
-    trangthai: true,
-  });
-
-  return await Users.findById(newUser._id).select("-matkhau");
-};
-
-// Cập nhật tài khoản
-export const updateUserService = async (id, data) => {
-  const { role, hoten, sdt, gioitinh, diachi, ngaysinh } = data;
-
-  const user = await Users.findById(id);
-  if (!user) {
-    const err = new Error("Không tìm thấy tài khoản");
-    err.status = 404;
-    throw err;
-  }
-
-  if (role !== undefined) {
-    if (role !== "Admin" && role !== "Khach") {
-      const err = new Error("Role chỉ được là Admin hoặc Khach");
-      err.status = 400;
-      throw err;
+    if (!user) {
+      throw new Error("Không tìm thấy người dùng");
     }
-    user.role = role;
+
+    return user;
   }
 
-  if (hoten !== undefined) user.hoten = hoten;
-  if (sdt !== undefined) user.sdt = sdt;
-  if (gioitinh !== undefined) user.gioitinh = gioitinh;
-  if (diachi !== undefined) user.diachi = diachi;
-  if (ngaysinh !== undefined) user.ngaysinh = ngaysinh;
+  // 3. Cập nhật tài khoản
+  static async updateUser(id, data) {
+    const user = await Users.findById(id);
 
-  await user.save();
+    if (!user) {
+      throw new Error("Không tìm thấy người dùng");
+    }
 
-  return await Users.findById(id).select("-matkhau");
-};
+    // chỉ cho sửa những field cần thiết
+    user.hoten = data.hoten ?? user.hoten;
+    user.email = data.email ?? user.email;
+    user.sdt = data.sdt ?? user.sdt;
+    user.gioitinh = data.gioitinh ?? user.gioitinh;
+    user.diachi = data.diachi ?? user.diachi;
+    user.ngaysinh = data.ngaysinh ?? user.ngaysinh;
+    user.role = data.role ?? user.role;
+    user.trangthai = data.trangthai ?? user.trangthai;
 
-// Khóa / mở khóa tài khoản
-export const updateUserStatusService = async (id, trangthai) => {
-  const user = await Users.findById(id);
+    await user.save();
 
-  if (!user) {
-    const err = new Error("Không tìm thấy tài khoản");
-    err.status = 404;
-    throw err;
+    return await Users.findById(id).select("-matkhau");
   }
 
-  user.trangthai = trangthai;
-  await user.save();
+  // 4. Khóa / mở khóa tài khoản
+  static async updateUserStatus(id) {
+    const user = await Users.findById(id);
 
-  return await Users.findById(id).select("-matkhau");
-};
+    if (!user) {
+      throw new Error("Không tìm thấy người dùng");
+    }
+
+    user.trangthai = !user.trangthai;
+    await user.save();
+
+    return user;
+  }
+
+  // 5. Xóa tài khoản
+  static async deleteUser(id) {
+    const user = await Users.findById(id);
+
+    if (!user) {
+      throw new Error("Không tìm thấy người dùng");
+    }
+
+    await Users.findByIdAndDelete(id);
+
+    return true;
+  }
+
+  // 6. Thống kê tài khoản
+  static async getUserStatistics() {
+    const tongTaiKhoan = await Users.countDocuments();
+    const taiKhoanHoatDong = await Users.countDocuments({ trangthai: true });
+    const taiKhoanDaKhoa = await Users.countDocuments({ trangthai: false });
+
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+    const taiKhoanVuaDangKy = await Users.countDocuments({
+      thoigiantao: { $gte: startOfDay },
+    });
+
+    return {
+      taiKhoanVuaDangKy,
+      taiKhoanHoatDong,
+      taiKhoanDaKhoa,
+      tongTaiKhoan,
+    };
+  }
+}
+
+export default ManageUserService;
