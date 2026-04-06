@@ -108,6 +108,7 @@ class TourController {
       const data = {
         tenTour,
         diaDiem,
+        hinhAnh,
         thoiLuong,
         giaNguoiLon,
         giaTreEm,

@@ -38,6 +38,7 @@ class TourService {
     console.log("FULL BODY:", data);
     console.log("TourService input:", data.TourServiceModel);
     //code chính
+    // thêm tour
     const newTour = await Tour.create({
       tenTour: data.tenTour,
       diaDiem: data.diaDiem,
@@ -53,27 +54,29 @@ class TourService {
       trangThai: data.trangThai,
     });
     // Tạo lịch tour
-    let schedules = [];
-    if (data.tourSchedules && data.tourSchedules.length > 0) {
-      schedules = await TourSchedule.insertMany(
-        data.tourSchedules.map(item => ({
+    let schedules = [];  // tạo mảng rỗng
+    if (data.tourSchedules && data.tourSchedules.length > 0) {  // kiểm tra có tour du lịch hay khỗng và có ít nhất 1 mảng rỗng
+      schedules = await TourSchedule.insertMany(  //  lưu dữ liệu vào bảng TourSchedule vào mảng schedules insertMany() dùng để thêm nhiều document cùng lúc vào collection.
+        data.tourSchedules.map(item => ({ // map() duyệt qua từng phần tử , Mỗi item sẽ được chuyển thành một object mới để lưu vào DB.
           ngaykhoihanh: item.ngaykhoihanh,
           ngayketthuc: item.ngayketthuc,
           Socho: item.Socho,
           Conlai: item.Socho,
         }))
       );
-    } // dã hoàn thành (note)
+    }else{
+      schedules = [];  // nếu không có lịch thì trả lại mảng rỗng
+    } 
     // Tạo  dịch vụ trong bảng Dichvu
     let services = [];
     if (data.services?.length > 0) {
       for (const serviceData of data.services || []) // lặp qua danh sách khi nhập dữ liệu
       {
-        let newService = await Service.findOne({ // khai báo để tìm tên dv và loại dv
+        let newService = await Service.findOne({ // khai báo để tìm tên dv và loại dv  
           tenDichVu: serviceData.tenDichVu,
           loaiDichVu: serviceData.loaiDichVu,
         });
-        if (!newService) {
+        if (!newService) {  // nếu khác khai báo thì tạo mới dịch vụ sau đó tạo dịch vụ
           newService = await Service.create({
             tenDichVu: serviceData.tenDichVu,
             loaiDichVu: serviceData.loaiDichVu,
@@ -85,7 +88,7 @@ class TourService {
           });
         }
         // tạo chức năng trong bảng tour_dichvu
-        const createdTourService = await TourServiceModel.create({
+        const createdTourService = await TourServiceModel.create({  // tạo vào model TourServiceModel
           tourId: newTour._id,
           dichvuId: newService._id,
           giaapdungnguoilon: serviceData.giaapdungnguoilon ?? newService.giaNguoiLon,
