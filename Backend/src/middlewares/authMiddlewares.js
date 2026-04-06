@@ -7,6 +7,7 @@ export const ProtetedRoute = async (req, res, next) => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1]; // lấy lại đằng sau Bearer
 
+        
         if(!token){
             return res.status(401).json({
                 message: "Không tìm thấy token, vui lòng đăng nhập"
