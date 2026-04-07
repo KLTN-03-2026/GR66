@@ -23,7 +23,7 @@ export const signUpService = async (data) => {
     const hashPassword = await bcrypt.hash(matkhau, 10); // salt = 10 2^10 số lần trộn
     // tạo user mới
     const newUser = await User.create({
-        role,
+        role: "user",
         hoten,
         email,
         ngaysinh,

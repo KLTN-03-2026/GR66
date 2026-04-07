@@ -38,51 +38,101 @@ class TourController {
     }
   }
 
+
+  // tạo tour
   static async createTour(req, res) {
     try {
-      const {
-        maTour,
+      let {
         tenTour,
-        diaDiemTour,
+        diaDiem,
         thoiLuong,
         giaNguoiLon,
         giaTreEm,
+        mota,
+        diemNoiBat,
+        loTrinh,
+        chitietdichvu,
+        dieuKhoanDichVu,
         trangThai,
+        tourSchedules,
+        services,
       } = req.body;
 
+      const files = req.files;
+      const hinhAnh = (req.files || []).map(file => file.filename);
+
+      // convert number
+      giaNguoiLon = Number(giaNguoiLon);
+      giaTreEm = Number(giaTreEm);
+
+      // parse JSON
+      try {
+        if (typeof tourSchedules === "string") {
+          tourSchedules = JSON.parse(tourSchedules);
+        }
+        if (typeof services === "string") {
+          services = JSON.parse(services);
+        }
+      } catch (err) {
+        return res.status(400).json({
+          success: false,
+          message: "Dữ liệu schedules hoặc services không hợp lệ (JSON sai)",
+        });
+      }
+
+      // validate bắt buộc
+      if (!tenTour || !diaDiem || !thoiLuong) {
+        return res.status(400).json({
+          success: false,
+          message: "Thiếu dữ liệu bắt buộc của tour",
+        });
+      }
+      // validate số
       if (
-        !maTour ||
-        !tenTour ||
-        !diaDiemTour ||
-        !thoiLuong ||
-        giaNguoiLon === undefined ||
-        giaTreEm === undefined
+        isNaN(giaNguoiLon) ||
+        isNaN(giaTreEm)
       ) {
         return res.status(400).json({
           success: false,
-          message:
-            "Mã tour, tên tour, địa điểm tour, thời lượng, giá người lớn và giá trẻ em là bắt buộc",
+          message: "Giá hoặc thời lượng không hợp lệ",
         });
       }
 
       if (trangThai && !["Hoạt động", "Ngưng"].includes(trangThai)) {
         return res.status(400).json({
           success: false,
-          message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
+          message: "Trạng thái không hợp lệ",
         });
       }
 
-      const newTour = await TourService.createTour(req.body);
+      const data = {
+        tenTour,
+        diaDiem,
+        hinhAnh,
+        thoiLuong,
+        giaNguoiLon,
+        giaTreEm,
+        mota,
+        trangThai,
+        diemNoiBat,
+        loTrinh,
+        chitietdichvu,
+        dieuKhoanDichVu,
+        hinhAnh,
+        tourSchedules,
+        services,
+      };
+
+      const newTour = await TourService.createTour(data);
 
       return res.status(201).json({
         success: true,
         message: "Thêm tour thành công",
         data: newTour,
       });
-    } catch (error) {
-      const statusCode = error.message === "Mã tour đã tồn tại" ? 400 : 500;
 
-      return res.status(statusCode).json({
+    } catch (error) {
+      return res.status(500).json({
         success: false,
         message: error.message,
       });

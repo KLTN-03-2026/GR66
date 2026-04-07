@@ -7,6 +7,7 @@ import cors from 'cors'
 import userRoute from './routes/UserJwt.js';
 import { ProtetedRoute } from './middlewares/authMiddlewares.js';
 import manageuserRoute from "./routes/manageuserRoute.js";
+import multer from 'multer'
 
 
 dotenv.config();
@@ -19,10 +20,9 @@ app.use(express.json()); // cho phép server đọc Json
 
 //public routes
 app.use('/api/auth', authRoute);
-app.use('/api/tours', tourRoute); 
+app.use('/api/tours', tourRoute);
 //private routes
-app.use(ProtetedRoute); // áp dụng middleware bảo vệ cho tất cả các route sau nó
-app.use('/api/users', userRoute);
+app.use('/api/users',ProtetedRoute ,userRoute);
 app.use("/api/manageuser", manageuserRoute);
 
 
