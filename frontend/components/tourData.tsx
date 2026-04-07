@@ -35,10 +35,10 @@ export const tourData = {
     "Chiều: trekking",
     "Tối: nghỉ ngơi",
   ],
+
   adultPrice: 1500000,
   childPrice: 750000,
 
-  // ✅ DỊCH VỤ BAO GỒM
   included: [
     "Xe tham quan (15, 25, 35, 45 chỗ tùy số lượng khách)",
     "Hành lý ký gửi: 20kg, xách tay 7kg/1 khách",
@@ -50,29 +50,58 @@ export const tourData = {
     "Thuế VAT",
   ],
 
-  // ✅ DỊCH VỤ THÊM
   extra: [
     {
       id: 1,
       title: "Dịch vụ thêm: Phương tiện di chuyển",
+      type: "Phương tiện di chuyển",
       description: "Vé máy bay khứ hồi, hỗ trợ đặt chỗ theo lịch trình tour.",
+
+      included: [
+        "Vé máy bay khứ hồi",
+        "Hỗ trợ đặt chỗ theo lịch trình",
+        "Hỗ trợ tư vấn giờ bay"
+      ],
+
       notIncluded: [
         "Hành lý quá cước",
         "Phí đổi ngày bay",
         "Phụ thu hạng ghế thương gia",
       ],
+
+      terms: [
+        "Giá có thể thay đổi tùy thời điểm đặt vé",
+        "Không hoàn hủy sát ngày khởi hành",
+        "Cần cung cấp thông tin đúng như CCCD"
+      ],
+
       adultPrice: 500000,
       childPrice: 350000,
     },
     {
       id: 2,
       title: "Dịch vụ thêm: Nơi ở",
+      type: "Lưu trú",
       description: "Khách sạn tiêu chuẩn 1 khách/phòng, tiện nghi cơ bản đầy đủ.",
+
+      included: [
+        "Phòng nghỉ tiêu chuẩn",
+        "Wifi miễn phí",
+        "Dọn phòng hằng ngày"
+      ],
+
       notIncluded: [
         "Giặt ủi",
         "Đồ uống minibar",
         "Phụ thu trả phòng trễ",
       ],
+
+      terms: [
+        "Nhận phòng sau 14:00",
+        "Trả phòng trước 12:00",
+        "Phụ thu nếu phát sinh thêm người"
+      ],
+
       adultPrice: 300000,
       childPrice: 200000,
     },

@@ -48,18 +48,18 @@ function BookingContent() {
   };
   const baseAdultCount = adult > 0 ? adult : 1;
 
-let extraTotal = 0;
+  let extraTotal = 0;
 
-tourData.extra.forEach((service) => {
-  if (selectedExtras.includes(service.id)) {
-    extraTotal += service.adultPrice * adult + service.childPrice * child;
-  }
-});
+  tourData.extra.forEach((service) => {
+    if (selectedExtras.includes(service.id)) {
+      extraTotal += service.adultPrice * adult + service.childPrice * child;
+    }
+  });
 
-const totalPrice =
-  tourData.adultPrice * baseAdultCount +
-  tourData.childPrice * child +
-  extraTotal;
+  const totalPrice =
+    tourData.adultPrice * baseAdultCount +
+    tourData.childPrice * child +
+    extraTotal;
 
   const review = tourData.reviewSection;
 
@@ -160,7 +160,7 @@ const totalPrice =
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={() => setShowFullItinerary(!showFullItinerary)}
-                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl text-sm 
+                    className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm 
                     font-medium flex items-center gap-2 transition-all active:scale-95"
                   >
                     <span>{showFullItinerary ? "Thu gọn ↑" : "Xem thêm →"}</span>
@@ -197,48 +197,55 @@ const totalPrice =
                     key={service.id}
                     className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
                   >
-                    {/* PHẦN LUÔN HIỂN THỊ */}
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-3">
-                        {service.title}
-                      </h3>
+                    <h3 className="font-semibold text-gray-800 mb-3">
+                      {service.title}
+                    </h3>
 
-                      <div className="text-sm text-gray-600">
-                        <p className="font-medium text-gray-800 mb-1">
-                          Thông tin dịch vụ thêm
-                        </p>
+                    <p className="font-medium text-gray-700 mb-3">
+                      Dịch vụ thêm: {service.type}
+                    </p>
 
-                        <p
-                          className="overflow-hidden text-ellipsis"
-                          style={
-                            !isExpanded
-                              ? {
-                                display: "-webkit-box",
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: "vertical",
-                              }
-                              : {}
-                          }
-                        >
-                          {service.description}
-                        </p>
+                    <div className="text-sm text-gray-600">
+                      <div
+                        className="overflow-hidden"
+                        style={
+                          !isExpanded
+                            ? {
+                              display: "-webkit-box",
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: "vertical",
+                            }
+                            : {}
+                        }
+                      >
+                        {service.included?.map((item, index) => (
+                          <p key={index}>• {item}</p>
+                        ))}
                       </div>
                     </div>
 
-                    {/* PHẦN CHỈ HIỆN KHI BẤM XEM CHI TIẾT */}
                     {isExpanded && (
                       <>
-                        <div className="mt-5 space-y-3 text-sm text-gray-600">
-                          <div>
-                            <p className="font-medium text-gray-800 mb-1">
-                              Dịch vụ thêm không bao gồm
-                            </p>
-                            <ul className="list-disc pl-5 space-y-1">
-                              {service.notIncluded.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
+                        <div className="mt-4 text-sm text-gray-600">
+                          <p className="font-medium text-gray-800 mb-1">
+                            Dịch vụ không bao gồm
+                          </p>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {service.notIncluded?.map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="mt-4 text-sm text-gray-600">
+                          <p className="font-medium text-gray-800 mb-1">
+                            Điều khoản
+                          </p>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {service.terms?.map((item, index) => (
+                              <li key={index}>{item}</li>
+                            ))}
+                          </ul>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
@@ -253,7 +260,7 @@ const totalPrice =
 
                           <div className="bg-gray-50 rounded-xl px-4 py-3 border">
                             <p className="text-sm text-gray-500 mb-1">
-                              Giá vé dịch vụ đối với trẻ em
+                              Giá dịch vụ đối với trẻ em
                             </p>
                             <p className="font-semibold text-red-500">
                               {service.childPrice.toLocaleString()} đ
@@ -263,24 +270,33 @@ const totalPrice =
                       </>
                     )}
 
-                    {/* 2 NÚT CÙNG MỘT HÀNG */}
-                    <div className="mt-[30px] flex justify-end gap-3">
+                    <div className="mt-[30px] flex justify-between items-center gap-4">
                       <button
                         onClick={() => toggleExtraDetail(service.id)}
-                        className="px-5 py-2.5 text-sm font-medium rounded-full bg-gray-200 hover:bg-gray-300 text-black transition-all active:scale-95"
+                        className="text-sm italic underline text-gray-700 hover:text-black transition"
                       >
-                        {isExpanded ? "Thu gọn" : "Xem chi tiết"}
+                        {isExpanded
+                          ? "Thu gọn thông tin dịch vụ"
+                          : "Xem thông tin chi tiết của dịch vụ"}
                       </button>
 
-                      <button
-                        onClick={() => toggleExtra(service.id)}
-                        className={`px-6 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
-                            ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-blue-500 hover:bg-blue-600 text-white"
-                          }`}
-                      >
-                        {isSelected ? "Đã thêm ✓" : "Thêm"}
-                      </button>
+                      <div className="flex items-center gap-4 shrink-0">
+                        {!isExpanded && (
+                          <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
+                            đ {service.adultPrice.toLocaleString()}
+                          </p>
+                        )}
+
+                        <button
+                          onClick={() => toggleExtra(service.id)}
+                          className={`px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
+                              ? "bg-green-600 hover:bg-green-700 text-white"
+                              : "bg-blue-500 hover:bg-blue-600 text-white"
+                            }`}
+                        >
+                          {isSelected ? "Đã thêm ✓" : "Thêm"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -311,7 +327,7 @@ const totalPrice =
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={() => setShowFullTerms(!showFullTerms)}
-                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
+                    className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
                   >
                     <span>{showFullTerms ? "Thu gọn ↑" : "Xem thêm →"}</span>
                   </button>
@@ -376,7 +392,7 @@ const totalPrice =
               </div>
             </div>
 
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
+            <button className="w-full bg-blue-500 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
               ĐẶT NGAY
             </button>
           </div>
