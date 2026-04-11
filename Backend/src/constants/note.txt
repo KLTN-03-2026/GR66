@@ -1,0 +1,5 @@
+JWT time (access/refresh token)
+✔ Role user (admin, user)
+✔ Status (pending, approved)
+✔ API message
+✔ HTTP status code
