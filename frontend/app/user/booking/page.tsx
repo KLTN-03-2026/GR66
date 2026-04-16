@@ -82,324 +82,326 @@ function BookingContent() {
         <h1 className="text-2xl font-semibold text-gray-800">
           {tourData.title}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 mt-1 mb-3">
           ⭐ {tourData.rating} | {tourData.reviews} đánh giá
         </p>
+        {/* IMAGES review---------------------------------------------------------------------------------- */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2 h-[400px] relative">
+            <Image
+              src={tourData.images[0]}
+              alt=""
+              fill
+              className="rounded-xl object-cover"
+            />
+          </div>
 
-        {/* ========================================    Main content     ============================= */}
-        <div className="grid grid-cols-3 gap-6 mt-6">
-
-          {/* ===== LEFT ===== */}
-          <div className="col-span-2 space-y-6">
-
-            {/* IMAGES review---------------------------------------------------------------------------------- */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 h-[300px] relative">
+          <div className="grid grid-cols-2 gap-4 mt-3.5">
+            {tourData.images.slice(1).map((img, index) => (
+              <div key={index} className="relative h-[160px]">
                 <Image
-                  src={tourData.images[0]}
+                  src={img}
                   alt=""
                   fill
                   className="rounded-xl object-cover"
                 />
               </div>
+            ))}
+          </div>
+        </div>
+        {/* IMAGES review end ---------------------------------------------------------------------------------- */}
 
-              <div className="grid grid-cols-2 gap-4 mt-3.5">
-                {tourData.images.slice(1).map((img, index) => (
-                  <div key={index} className="relative h-[120px]">
-                    <Image
-                      src={img}
-                      alt=""
-                      fill
-                      className="rounded-xl object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* IMAGES review end ---------------------------------------------------------------------------------- */}
+        {/* ========================================    Main content     ============================= */}
+        <div>
+          <div className="grid grid-cols-3 gap-6 mt-6">
 
-            {/* DESCRIPTION */}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="font-semibold text-lg text-gray-800 mb-2">
-                {tourData.description.title}
-              </h2>
-              <p className="text-gray-500 text-sm">
-                {tourData.description.content}
-              </p>
+            {/* ===== LEFT ===== */}
+            <div className="col-span-2 space-y-6">
 
-              <div className="mt-4 text-sm text-gray-600">
-                <p className="font-medium text-gray-800 mb-2">
-                  Điểm nổi bật
+
+
+              {/* DESCRIPTION */}
+              <div className="bg-white rounded-xl p-5 shadow-sm">
+                <h2 className="font-semibold text-lg text-gray-800 mb-2">
+                  {tourData.description.title}
+                </h2>
+                <p className="text-gray-500 text-sm">
+                  {tourData.description.content}
                 </p>
-                <ul className="list-disc pl-5 space-y-1">
-                  {tourData.description.highlights.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            {/* DESCRIPTION end-----------------------------------------------------------------------------------------*/}
 
-
-            {/* ITINERARY */}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="font-semibold text-lg text-gray-800 mb-2">
-                Lộ trình
-              </h2>
-
-              <ul className="text-sm text-gray-600 space-y-1 overflow-hidden">
-                {(showFullItinerary
-                  ? tourData.itinerary
-                  : tourData.itinerary.slice(0, 5)
-                ).map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-
-              {tourData.itinerary.length > 5 && (
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => setShowFullItinerary(!showFullItinerary)}
-                    className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm 
-                    font-medium flex items-center gap-2 transition-all active:scale-95"
-                  >
-                    <span>{showFullItinerary ? "Thu gọn ↑" : "Xem thêm →"}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* ITINERARY end -------------------------------------------------------------------- */}
-
-
-
-            <div className="space-y-6">
-
-              {/* INCLUDED SERVICES */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                <h3 className="font-semibold text-gray-800 mb-3">
-                  Chi tiết dịch vụ bao gồm
-                </h3>
-                <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
-                  {tourData.included.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* EXTRA SERVICES */}
-
-              {tourData.extra.map((service) => {
-                const isSelected = selectedExtras.includes(service.id);
-                const isExpanded = expandedExtras.includes(service.id);
-
-                return (
-                  <div
-                    key={service.id}
-                    className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
-                  >
-                    <h3 className="font-semibold text-gray-800 mb-3">
-                      {service.title}
-                    </h3>
-
-                    <p className="font-medium text-gray-700 mb-3">
-                      Dịch vụ thêm: {service.type}
-                    </p>
-
-                    <div className="text-sm text-gray-600">
-                      <div
-                        className="overflow-hidden"
-                        style={
-                          !isExpanded
-                            ? {
-                              display: "-webkit-box",
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: "vertical",
-                            }
-                            : {}
-                        }
-                      >
-                        {service.included?.map((item, index) => (
-                          <p key={index}>• {item}</p>
-                        ))}
-                      </div>
-                    </div>
-
-                    {isExpanded && (
-                      <>
-                        <div className="mt-4 text-sm text-gray-600">
-                          <p className="font-medium text-gray-800 mb-1">
-                            Dịch vụ không bao gồm
-                          </p>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {service.notIncluded?.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="mt-4 text-sm text-gray-600">
-                          <p className="font-medium text-gray-800 mb-1">
-                            Điều khoản
-                          </p>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {service.terms?.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
-                          <div className="bg-gray-50 rounded-xl px-4 py-3 border">
-                            <p className="text-sm text-gray-500 mb-1">
-                              Giá dịch vụ đối với người lớn
-                            </p>
-                            <p className="font-semibold text-red-500">
-                              {service.adultPrice.toLocaleString()} đ
-                            </p>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-xl px-4 py-3 border">
-                            <p className="text-sm text-gray-500 mb-1">
-                              Giá dịch vụ đối với trẻ em
-                            </p>
-                            <p className="font-semibold text-red-500">
-                              {service.childPrice.toLocaleString()} đ
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <div className="mt-[30px] flex justify-between items-center gap-4">
-                      <button
-                        onClick={() => toggleExtraDetail(service.id)}
-                        className="text-sm italic underline text-gray-700 hover:text-black transition"
-                      >
-                        {isExpanded
-                          ? "Thu gọn thông tin dịch vụ"
-                          : "Xem thông tin chi tiết của dịch vụ"}
-                      </button>
-
-                      <div className="flex items-center gap-4 shrink-0">
-                        {!isExpanded && (
-                          <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
-                            đ {service.adultPrice.toLocaleString()}
-                          </p>
-                        )}
-
-                        <button
-                          onClick={() => toggleExtra(service.id)}
-                          className={`px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
-                              ? "bg-green-600 hover:bg-green-700 text-white"
-                              : "bg-blue-500 hover:bg-blue-600 text-white"
-                            }`}
-                        >
-                          {isSelected ? "Đã thêm ✓" : "Thêm"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-
-            {/*============= ĐIỀU KHOẢN ===========================================*/}
-            <div className="bg-white rounded-xl p-5 shadow-sm">
-              <h2 className="font-semibold text-lg text-gray-800 mb-3">
-                Điều khoản sử dụng
-              </h2>
-
-              <div className="text-sm text-gray-600 space-y-3">
-                <div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p className="font-medium text-gray-800 mb-2">
+                    Điểm nổi bật
+                  </p>
                   <ul className="list-disc pl-5 space-y-1">
-                    {(showFullTerms
-                      ? tourData.terms
-                      : tourData.terms.slice(0, 4)
-                    ).map((item, index) => (
+                    {tourData.description.highlights.map((item, index) => (
                       <li key={index}>{item}</li>
                     ))}
                   </ul>
                 </div>
               </div>
+              {/* DESCRIPTION end-----------------------------------------------------------------------------------------*/}
 
-              {tourData.terms.length > 4 && (
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => setShowFullTerms(!showFullTerms)}
-                    className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
-                  >
-                    <span>{showFullTerms ? "Thu gọn ↑" : "Xem thêm →"}</span>
-                  </button>
+
+              {/* ITINERARY */}
+              <div className="bg-white rounded-xl p-5 shadow-sm">
+                <h2 className="font-semibold text-lg text-gray-800 mb-2">
+                  Lộ trình
+                </h2>
+
+                <ul className="text-sm text-gray-600 space-y-1 overflow-hidden">
+                  {(showFullItinerary
+                    ? tourData.itinerary
+                    : tourData.itinerary.slice(0, 5)
+                  ).map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+
+                {tourData.itinerary.length > 5 && (
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => setShowFullItinerary(!showFullItinerary)}
+                      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm 
+                    font-medium flex items-center gap-2 transition-all active:scale-95"
+                    >
+                      <span>{showFullItinerary ? "Thu gọn ↑" : "Xem thêm →"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              {/* ITINERARY end -------------------------------------------------------------------- */}
+
+
+
+              <div className="space-y-6">
+
+                {/* INCLUDED SERVICES */}
+                <div className="bg-white rounded-2xl p-5 shadow-sm border">
+                  <h3 className="font-semibold text-gray-800 mb-3">
+                    Chi tiết dịch vụ bao gồm
+                  </h3>
+                  <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
+                    {tourData.included.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
-              )}
+
+                {/* EXTRA SERVICES */}
+
+                {tourData.extra.map((service) => {
+                  const isSelected = selectedExtras.includes(service.id);
+                  const isExpanded = expandedExtras.includes(service.id);
+
+                  return (
+                    <div
+                      key={service.id}
+                      className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
+                    >
+                      <h3 className="font-semibold text-gray-800 mb-3">
+                        {service.title}
+                      </h3>
+
+                      <p className="font-medium text-gray-700 mb-3">
+                        Dịch vụ thêm: {service.type}
+                      </p>
+
+                      <div className="text-sm text-gray-600">
+                        <div
+                          className="overflow-hidden"
+                          style={
+                            !isExpanded
+                              ? {
+                                display: "-webkit-box",
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: "vertical",
+                              }
+                              : {}
+                          }
+                        >
+                          {service.included?.map((item, index) => (
+                            <p key={index}>• {item}</p>
+                          ))}
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <>
+                          <div className="mt-4 text-sm text-gray-600">
+                            <p className="font-medium text-gray-800 mb-1">
+                              Dịch vụ không bao gồm
+                            </p>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {service.notIncluded?.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="mt-4 text-sm text-gray-600">
+                            <p className="font-medium text-gray-800 mb-1">
+                              Điều khoản
+                            </p>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {service.terms?.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+                            <div className="bg-gray-50 rounded-xl px-4 py-3 border">
+                              <p className="text-sm text-gray-500 mb-1">
+                                Giá dịch vụ đối với người lớn
+                              </p>
+                              <p className="font-semibold text-red-500">
+                                {service.adultPrice.toLocaleString()} đ
+                              </p>
+                            </div>
+
+                            <div className="bg-gray-50 rounded-xl px-4 py-3 border">
+                              <p className="text-sm text-gray-500 mb-1">
+                                Giá dịch vụ đối với trẻ em
+                              </p>
+                              <p className="font-semibold text-red-500">
+                                {service.childPrice.toLocaleString()} đ
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      <div className="mt-[30px] flex justify-between items-center gap-4">
+                        <button
+                          onClick={() => toggleExtraDetail(service.id)}
+                          className="text-sm italic underline text-gray-700 hover:text-black transition"
+                        >
+                          {isExpanded
+                            ? "Thu gọn thông tin dịch vụ"
+                            : "Xem thông tin chi tiết của dịch vụ"}
+                        </button>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          {!isExpanded && (
+                            <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
+                              đ {service.adultPrice.toLocaleString()}
+                            </p>
+                          )}
+
+                          <button
+                            onClick={() => toggleExtra(service.id)}
+                            className={`px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
+                              ? "bg-green-600 hover:bg-green-700 text-white"
+                              : "bg-blue-500 hover:bg-blue-600 text-white"
+                              }`}
+                          >
+                            {isSelected ? "Đã thêm ✓" : "Thêm"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+
+              {/*============= ĐIỀU KHOẢN ===========================================*/}
+              <div className="bg-white rounded-xl p-5 shadow-sm">
+                <h2 className="font-semibold text-lg text-gray-800 mb-3">
+                  Điều khoản sử dụng
+                </h2>
+
+                <div className="text-sm text-gray-600 space-y-3">
+                  <div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {(showFullTerms
+                        ? tourData.terms
+                        : tourData.terms.slice(0, 4)
+                      ).map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {tourData.terms.length > 4 && (
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => setShowFullTerms(!showFullTerms)}
+                      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
+                    >
+                      <span>{showFullTerms ? "Thu gọn ↑" : "Xem thêm →"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+
+
+
             </div>
+            {/* ===== LEFT end ===================================================================================================================== */}
 
 
 
 
-          </div>
-          {/* ===== LEFT end ===================================================================================================================== */}
-
-
-
-
-          {/* ===== RIGHT BOOKING ===== */}
-          <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm 
+            {/* ===== RIGHT BOOKING ===== */}
+            <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm 
                 sticky top-24 z-40">
-            <p className="font-semibold text-2xl text-gray-800 mb-6">
-              Tổng tiền: <span className="text-blue-600">{totalPrice.toLocaleString()} đ</span>
-            </p>
+              <p className="font-semibold text-2xl text-gray-800 mb-6">
+                Tổng tiền: <span className="text-blue-600">{totalPrice.toLocaleString()} đ</span>
+              </p>
 
-            <div className="mb-3">
-              <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">
-                Check-in
-              </span>
-              <input
-                type="date"
-                value={checkInDate}
-                min={today}
-                onChange={handleCheckInChange}
-                className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-500"
-              />
+              <div className="mb-3">
+                <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">
+                  Check-in
+                </span>
+                <input
+                  type="date"
+                  value={checkInDate}
+                  min={today}
+                  onChange={handleCheckInChange}
+                  className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-500"
+                />
 
-              {checkInError && (
-                <p className="text-red-500 text-sm mt-2">{checkInError}</p>
-              )}
-            </div>
+                {checkInError && (
+                  <p className="text-red-500 text-sm mt-2">{checkInError}</p>
+                )}
+              </div>
 
-            {/* Số người lớn */}
-            <div className="flex justify-between items-center mb-4 mt-6">
-              <span className="text-lg text-gray-800">Số người lớn</span>
-              <div className="flex items-center gap-2 text-gray-600 ">
-                <button onClick={() => setAdult(Math.max(1, adult - 1))} className="w-8 h-8 flex items-center justify-center text-xl border 
+              {/* Số người lớn */}
+              <div className="flex justify-between items-center mb-4 mt-6">
+                <span className="text-lg text-gray-800">Số người lớn</span>
+                <div className="flex items-center gap-2 text-gray-600 ">
+                  <button onClick={() => setAdult(Math.max(1, adult - 1))} className="w-8 h-8 flex items-center justify-center text-xl border 
                 border-gray-300 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">−</button>
-                <span className="text-xl font-semibold w-8 text-center">{adult}</span>
-                <button onClick={() => setAdult(adult + 1)} className="w-8 h-8 flex items-center justify-center text-xl border
+                  <span className="text-xl font-semibold w-8 text-center">{adult}</span>
+                  <button onClick={() => setAdult(adult + 1)} className="w-8 h-8 flex items-center justify-center text-xl border
                  border-gray-300 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">+</button>
+                </div>
               </div>
-            </div>
 
-            {/* Số trẻ em */}
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-lg text-gray-800">Số trẻ em</span>
-              <div className="flex items-center gap-2 text-gray-600">
-                <button onClick={() => setChild(Math.max(0, child - 1))} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 
+              {/* Số trẻ em */}
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-lg text-gray-800">Số trẻ em</span>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <button onClick={() => setChild(Math.max(0, child - 1))} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 
                 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">−</button>
-                <span className="text-xl font-semibold w-8 text-center">{child}</span>
-                <button onClick={() => setChild(child + 1)} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full
+                  <span className="text-xl font-semibold w-8 text-center">{child}</span>
+                  <button onClick={() => setChild(child + 1)} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 rounded-full
                  hover:bg-gray-100 active:bg-gray-200 transition-all">+</button>
+                </div>
               </div>
+
+              <button className="w-full bg-blue-500 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
+                ĐẶT NGAY
+              </button>
             </div>
+            {/* ===== RIGHT BOOKING end ============================================================================================================ */}
 
-            <button className="w-full bg-blue-500 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold text-lg transition-all active:scale-95">
-              ĐẶT NGAY
-            </button>
           </div>
-          {/* ===== RIGHT BOOKING end ============================================================================================================ */}
-
         </div>
-
 
 
 

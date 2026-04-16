@@ -37,7 +37,7 @@ export const tourData = {
   ],
 
   adultPrice: 1500000,
-  childPrice: 750000,
+  childPrice: 700000,
 
   included: [
     "Xe tham quan (15, 25, 35, 45 chỗ tùy số lượng khách)",
