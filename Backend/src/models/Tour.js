@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const tourSchema = new mongoose.Schema(
   {
+    maTour: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     tenTour: {
       type: String,
       required: true,
@@ -21,17 +26,6 @@ const tourSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    giaNguoiLon: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    giaTreEm: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     mota: {
       type: String,
       require: true,
@@ -49,13 +43,13 @@ const tourSchema = new mongoose.Schema(
       trim: true,
     },
 
-    chitietdichvu: {
+    chitiettour: {
       type: String,
       default: "",
       trim: true,
     },
 
-    dieuKhoanDichVu: {
+    dieuKhoan: {
       type: String,
       default: "",
       trim: true,

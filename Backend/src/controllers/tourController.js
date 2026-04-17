@@ -1,4 +1,7 @@
+import TourSchedule from "../models/tourSchedule.js";
 import TourService from "../services/tourService.js";
+import Service from "../models/service.js";
+import Tour from "../models/Tour.js";
 
 class TourController {
   static async getAllTours(req, res) {
@@ -17,7 +20,6 @@ class TourController {
       });
     }
   }
-
   static async getTourById(req, res) {
     try {
       const { id } = req.params;
@@ -42,203 +44,137 @@ class TourController {
   // tạo tour
   static async createTour(req, res) {
     try {
-      let {
-        tenTour,
-        diaDiem,
-        thoiLuong,
-        giaNguoiLon,
-        giaTreEm,
-        mota,
-        diemNoiBat,
-        loTrinh,
-        chitietdichvu,
-        dieuKhoanDichVu,
-        trangThai,
-        tourSchedules,
-        services,
-      } = req.body;
+      const data = req.body;
 
-      const files = req.files;
-      const hinhAnh = (req.files || []).map(file => file.filename);
-
-      // convert number
-      giaNguoiLon = Number(giaNguoiLon);
-      giaTreEm = Number(giaTreEm);
-
-      // parse JSON
-      try {
-        if (typeof tourSchedules === "string") {
-          tourSchedules = JSON.parse(tourSchedules);
-        }
-        if (typeof services === "string") {
-          services = JSON.parse(services);
-        }
-      } catch (err) {
+      data.hinhAnh = req.files
+        ? req.files.map(file => file.path)
+        : [];
+      // Validate input cơ bản
+      if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
-          success: false,
-          message: "Dữ liệu schedules hoặc services không hợp lệ (JSON sai)",
+          message: "Dữ liệu tour không được để trống",
+        });
+      }
+      const tour = await TourService.createTour(req.body);
+      return res.status(201).json({
+        message: "Tạo tour thành công",
+        data: tour,
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      // dữ liệu nhập vào  không hợp lệ
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          message: "Dữ liệu không hợp lệ",
+          error: error.message,
+        });
+      }
+      return res.status(500).json({
+        message: "Lỗi tạo tour 1",
+        error: error.message,
+      });
+    }
+  }
+  // tạo loại dịch vụ 
+  static async createServiceType(req, res) {
+    try {
+      const serviceType = await TourService.createServiceType(req.body);
+      return res.status(201).json({
+        message: "tạo loại dịch vụ thành công",
+        data: serviceType
+      })
+    } catch (err) {
+      console.error(err);
+      // dữ liệu nhập vào  không hợp lệ
+      if (err.name === "ValidationError") {
+        return res.status(400).json({
+          message: "Dữ liệu không hợp lệ",
+          error: err.message,
+        });
+      }
+      return res.status(500).json({
+        message: "Lỗi tạo tour",
+        error: err.message,
+      });
+    }
+  }
+  //tạo dịch vụ 
+  static async createService(req, res){
+    try{
+        // Validate input cơ bản
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({
+          message: "Dữ liệu tour không được để trống",
         });
       }
 
-      // validate bắt buộc
-      if (!tenTour || !diaDiem || !thoiLuong) {
-        return res.status(400).json({
-          success: false,
-          message: "Thiếu dữ liệu bắt buộc của tour",
-        });
-      }
-      // validate số
-      if (
-        isNaN(giaNguoiLon) ||
-        isNaN(giaTreEm)
-      ) {
-        return res.status(400).json({
-          success: false,
-          message: "Giá hoặc thời lượng không hợp lệ",
-        });
-      }
-
-      if (trangThai && !["Hoạt động", "Ngưng"].includes(trangThai)) {
-        return res.status(400).json({
-          success: false,
-          message: "Trạng thái không hợp lệ",
-        });
-      }
-
-      const data = {
-        tenTour,
-        diaDiem,
-        hinhAnh,
-        thoiLuong,
-        giaNguoiLon,
-        giaTreEm,
-        mota,
-        trangThai,
-        diemNoiBat,
-        loTrinh,
-        chitietdichvu,
-        dieuKhoanDichVu,
-        hinhAnh,
-        tourSchedules,
-        services,
-      };
-
-      const newTour = await TourService.createTour(data);
+      // tạo dịch vụ đẩy logic qua file services
+      const service = await TourService.createService(req.body);
 
       return res.status(201).json({
-        success: true,
-        message: "Thêm tour thành công",
-        data: newTour,
+        message: "Tạo dịch vụ thành công",
+        data: service,
       });
-
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
+      // dữ liệu nhập vào  không hợp lệ
+      if (err.name === "ValidationError") {
+        return res.status(400).json({
+          message: "Dữ liệu không hợp lệ",
+          error: err.message,
+        });
+      }
       return res.status(500).json({
-        success: false,
-        message: error.message,
+        message: "Lỗi tạo dịch vụ",
+        error: err.message,
       });
     }
   }
-
-  static async updateTour(req, res) {
-    try {
-      const { id } = req.params;
-      const { trangThai, giaNguoiLon, giaTreEm } = req.body;
-
-      if (trangThai && !["Hoạt động", "Ngưng"].includes(trangThai)) {
+  //tạo dịch vụ cho từng tour
+  static async createTourService(req, res){
+    try{
+        // Validate input cơ bản
+      if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
-          success: false,
-          message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
+          message: "Dữ liệu tour không được để trống",
         });
       }
 
-      if (giaNguoiLon !== undefined && giaNguoiLon < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Giá người lớn phải lớn hơn hoặc bằng 0",
-        });
-      }
+      // tạo dịch vụ đẩy logic qua file services
+      const tourService = await TourService.createTourService(req.body);
 
-      if (giaTreEm !== undefined && giaTreEm < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Giá trẻ em phải lớn hơn hoặc bằng 0",
-        });
-      }
-
-      const updatedTour = await TourService.updateTour(id, req.body);
-
-      return res.status(200).json({
-        success: true,
-        message: "Cập nhật tour thành công",
-        data: updatedTour,
+      return res.status(201).json({
+        message: "Tạo dịch vụ thành công",
+        data: tourService,
       });
-    } catch (error) {
-      const statusCode =
-        error.message === "Không tìm thấy tour"
-          ? 404
-          : error.message === "Mã tour đã tồn tại"
-          ? 400
-          : 500;
-
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message,
+    } catch (err) {
+      console.error(err);
+      // dữ liệu nhập vào  không hợp lệ
+      if (err.name === "ValidationError") {
+        return res.status(400).json({
+          message: "Dữ liệu không hợp lệ",
+          error: err.message,
+        });
+      }
+      return res.status(500).json({
+        message: "Lỗi tạo dịch vụ cho từng tour",
+        error: err.message,
       });
     }
   }
-
-  static async deleteTour(req, res) {
+  //Hiển thị các tour
+  static async viewTour(req, res) {
     try {
-      const { id } = req.params;
-      await TourService.deleteTour(id);
+      const tour = await TourService.getTourDetail(req.params.id);
 
-      return res.status(200).json({
+      return res.json({
         success: true,
-        message: "Xóa tour thành công",
+        data: tour,
       });
-    } catch (error) {
-      const statusCode = error.message === "Không tìm thấy tour" ? 404 : 500;
-
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message,
-      });
-    }
-  }
-
-  static async updateTourStatus(req, res) {
-    try {
-      const { id } = req.params;
-      const { trangThai } = req.body;
-
-      if (!trangThai) {
-        return res.status(400).json({
-          success: false,
-          message: "Trạng thái tour là bắt buộc",
-        });
-      }
-
-      if (!["Hoạt động", "Ngưng"].includes(trangThai)) {
-        return res.status(400).json({
-          success: false,
-          message: "Trạng thái chỉ được là 'Hoạt động' hoặc 'Ngưng'",
-        });
-      }
-
-      const updatedTour = await TourService.updateTourStatus(id, trangThai);
-
-      return res.status(200).json({
-        success: true,
-        message: "Cập nhật trạng thái tour thành công",
-        data: updatedTour,
-      });
-    } catch (error) {
-      const statusCode = error.message === "Không tìm thấy tour" ? 404 : 500;
-
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message,
-      });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
     }
   }
 }

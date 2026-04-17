@@ -101,9 +101,13 @@ export const loginGoogle = async (token) => {
     }
     //tạo access token
     const accessToken = jwt.sign(
-        { userId: user._id },
+        {
+            userId: user._id
+        },
         process.env.JWT_SECRET,
-        { expiresIn: ACCESS_TOKEN_TTL }
+        {
+            expiresIn: ACCESS_TOKEN_TTL
+        }
     );
 
     //tạo refresh token

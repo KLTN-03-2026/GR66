@@ -4,7 +4,7 @@ const tourScheduleSchema = new mongoose.Schema({
     tourId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Tour",
-        require: true,
+        required: true,
         index: true,
     },
     ngaykhoihanh: {
