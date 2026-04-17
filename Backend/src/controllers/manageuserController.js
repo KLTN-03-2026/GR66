@@ -102,9 +102,7 @@ import {
           message: "trangthai phải là true hoặc false",
         });
       }
-  
       const result = await updateUserStatusService(req.params.id, trangthai);
-  
       return res.status(200).json({
         success: true,
         message: "Cập nhật trạng thái tài khoản thành công",

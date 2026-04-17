@@ -13,13 +13,33 @@ const tourServiceschema = new mongoose.Schema({
         required: true,
         index: true,
     },
-    giaapdungnguoilon: {
-        type: Number,
-        default: 0, // Nếu bạn không truyền giá trị cho field đó, thì nó sẽ tự động nhận giá trị 0.
+    tenDichVuApDung: {
+        type: String,
+        required: true, // bắt buộc phải cso dữ liệu
+
     },
-    giaapdungtreem: {
+    giaApDungNguoiLon: {
         type: Number,
-        default: 0,
+        min: 0,
+        required: true, // bắt buộc phải cso dữ liệu
+        
+    },
+    giaApDungTreEm: {
+        type: Number,
+        min: 0,
+        required: true, // bắt buộc phải cso dữ liệu
+    },
+    noiDungDichVuBaoGom: {
+        type: String,
+        default: ""
+    },
+    noiDungDichVuKhongBaoGom: {
+        type: String,
+        default: ""
+    },
+    dieuKhoan: {
+        type: String,
+        default: ""
     }
 }, {
     collection: "tourServices",

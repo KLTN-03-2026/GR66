@@ -1,34 +1,32 @@
 import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema({
-  tenDichVu: {
+  serviceTypeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "serviceType",
+    required: true
+  },
+  tendichvu: {
     type: String,
     required: true
   },
-  loaiDichVu: {
-    type: String
-  },
-  noiDungBaoGom: {
-    type: String
-  },
-  noiDungKhongBaoGom: {
-    type: String
-  },
-  dieuKhoan: {
-    type: String
-  },
-  giaNguoiLon: {
-    type: Number,
+  moTa: {
+    type: String,
     required: true
   },
-  giaTreEm: {
-    type: Number,
+  donVi: {
+    type: String,
     required: true
-  }
+  },
+  trangThai: {
+    type: String,
+    enum: ["Hoạt động", "Ngưng"],
+    default: "Ngưng",
+  },
 }, {
   collection: "services",
   timestamps: true
 });
 
-const Service = mongoose.model("Service" , serviceSchema);
+const Service = mongoose.model("Service", serviceSchema);
 export default Service;

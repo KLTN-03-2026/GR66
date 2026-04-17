@@ -4,13 +4,19 @@ import { upload } from "../middlewares/upload_Img.js";
 
 const router = express.Router();
 
+
+
 router.get("/", TourController.getAllTours);
-//router.post("/create", TourController.createTour); // tạo tour
-router.post('/create',upload.array('hinhAnh'), TourController.createTour) // upload lấy từ mdw upload_img.js | upload.array thêm nhiều ảnh nếu muốn thêm 11 ảnh sử dụng single
-router.get("/:id", TourController.getTourById);
-router.put("/:id", TourController.updateTour);
-router.delete("/:id", TourController.deleteTour);
-router.patch("/:id/status", TourController.updateTourStatus);
+// tạo tour
+router.post('/create/tours',upload.array('hinhAnh'), TourController.createTour) // upload lấy từ mdw upload_img.js | upload.array thêm nhiều ảnh nếu muốn thêm 11 ảnh sử dụng single
+// tạo loại dịch vụ
+router.post('/create/serviceTypes', TourController.createServiceType)
+// tạo dịch vụ 
+router.post('/create/services', TourController.createService )
+// tạo gói dịch vụ cho từng loại tour
+router.post('/create/tourService', TourController.createTourService)
+//Hiển thị các gói dịch vụ
+router.get("/view/:id", TourController.viewTour);   
 
 
 
