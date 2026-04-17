@@ -39,18 +39,23 @@ class TourController {
       });
     }
   }
+
+
   // tạo tour
   static async createTour(req, res) {
     try {
+      const data = req.body;
+
+      data.hinhAnh = req.files
+        ? req.files.map(file => file.path)
+        : [];
       // Validate input cơ bản
       if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({
           message: "Dữ liệu tour không được để trống",
         });
       }
-
       const tour = await TourService.createTour(req.body);
-
       return res.status(201).json({
         message: "Tạo tour thành công",
         data: tour,
@@ -58,6 +63,7 @@ class TourController {
 
     } catch (error) {
       console.error(error);
+
       // dữ liệu nhập vào  không hợp lệ
       if (error.name === "ValidationError") {
         return res.status(400).json({
@@ -66,7 +72,7 @@ class TourController {
         });
       }
       return res.status(500).json({
-        message: "Lỗi tạo tour",
+        message: "Lỗi tạo tour 1",
         error: error.message,
       });
     }

@@ -18,6 +18,7 @@ class TourService {
     //debug
     console.log("FULL BODY:", data);
     console.log("TourService input:", data.TourServiceModel);
+    
     //code chính
     try {
       // thêm tour
@@ -26,7 +27,7 @@ class TourService {
         maTour,
         tenTour: data.tenTour,
         diaDiem: data.diaDiem,
-        hinhAnh: data.hinhAnh,
+        hinhAnh: Array.isArray(data.hinhAnh) ? data.hinhAnh : [],
         thoiLuong: data.thoiLuong,
         mota: data.mota,
         diemNoiBat: data.diemNoiBat,
@@ -127,6 +128,7 @@ class TourService {
       throw err;
     }
   }
+  
   // tạo loại dịch vụ
   static async createServiceType(data) {
     try {
