@@ -5,6 +5,8 @@ import { useState } from "react";
 import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { FaMapMarkerAlt } from "react-icons/fa";
+
 
 
 
@@ -79,12 +81,20 @@ function BookingContent() {
       <div className="max-w-6xl mx-auto p-6 ">
 
         {/* TITLE */}
-        <h1 className="text-2xl font-semibold text-gray-800">
+        <h1 className="text-2xl font-semibold text-gray-800 ">
           {tourData.title}
         </h1>
-        <p className="text-sm text-gray-500 mt-1 mb-3">
-          ⭐ {tourData.rating} | {tourData.reviews} đánh giá
-        </p>
+        <div className="flex">
+          <p className="text-sm text-gray-500 mt-1 mb-3  ">
+            ⭐ {tourData.rating} | {tourData.reviews} đánh giá
+          </p>
+
+          <h2 className="text-sm text-gray-500 mt-1 mb-3 ml-8 flex items-center gap-1">
+            <FaMapMarkerAlt className="text-red-500" />
+            {tourData.location}
+          </h2>
+        </div>
+
         {/* IMAGES review---------------------------------------------------------------------------------- */}
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2 h-[400px] relative">
@@ -122,17 +132,12 @@ function BookingContent() {
 
               {/* DESCRIPTION */}
               <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h2 className="font-semibold text-lg text-gray-800 mb-2">
-                  {tourData.description.title}
-                </h2>
-                <p className="text-gray-500 text-sm">
-                  {tourData.description.content}
-                </p>
 
-                <div className="mt-4 text-sm text-gray-600">
-                  <p className="font-medium text-gray-800 mb-2">
+
+                <div className="text-sm text-gray-600">
+                  <h1 className="font-semibold text-lg text-gray-800 mb-2">
                     Điểm nổi bật
-                  </p>
+                  </h1>
                   <ul className="list-disc pl-5 space-y-1">
                     {tourData.description.highlights.map((item, index) => (
                       <li key={index}>{item}</li>
@@ -272,7 +277,7 @@ function BookingContent() {
                         </>
                       )}
 
-                      <div className="mt-[30px] flex justify-between items-center gap-4">
+                      <div className="mt-[10px] flex justify-between items-center gap-4">
                         <button
                           onClick={() => toggleExtraDetail(service.id)}
                           className="text-sm italic underline text-gray-700 hover:text-black transition"
@@ -329,7 +334,7 @@ function BookingContent() {
                   <div className="flex justify-end mt-4">
                     <button
                       onClick={() => setShowFullTerms(!showFullTerms)}
-                      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
+                      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-2xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
                     >
                       <span>{showFullTerms ? "Thu gọn ↑" : "Xem thêm →"}</span>
                     </button>

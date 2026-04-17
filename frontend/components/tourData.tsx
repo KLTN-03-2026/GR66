@@ -1,5 +1,5 @@
 export const tourData = {
-  title: "Núi bà đen | Thành phố Tây Bắc | Bắc Ninh",
+  title: "Núi bà đen | Thành phố Tây Bắc",
   rating: 4.0,
   reviews: 13,
 
@@ -11,10 +11,9 @@ export const tourData = {
     "/glr7.jpg",
   ],
 
+  location: "Tây Ninh",
+
   description: {
-    title: "Tour du lịch núi bà đen tại Bắc Ninh, Việt Nam",
-    content:
-      "Tận hưởng hành trình của bạn tại núi bà đen trong 2 ngày, 1 đêm của tour",
     highlights: [
       "Trải nghiệm cáp treo Chùa Bà nổi tiếng",
       "Check-in cảnh đẹp thiên nhiên",

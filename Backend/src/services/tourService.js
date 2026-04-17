@@ -2,188 +2,194 @@ import Tour from "../models/Tour.js";
 import TourSchedule from "../models/tourSchedule.js";
 import Service from "../models/service.js";
 import TourServiceModel from "../models/tourService.js"; //Rename để tránh trùng với tên class bản chất nó là tour dịch vụ
-
+import mongoose from "mongoose";
+import TourPrice from "../models/TourPrice.js";
+import serviceType from "../models/serviceType.js";
 
 class TourService {
-  static async getAllTours(query = {}) {
-    const filter = {};
-    if (query.keyword) {
-      filter.$or = [
-        { maTour: { $regex: query.keyword, $options: "i" } },
-        { tenTour: { $regex: query.keyword, $options: "i" } },
-        { diaDiemTour: { $regex: query.keyword, $options: "i" } },
-      ];
-    }
 
-    if (query.trangThai) {
-      filter.trangThai = query.trangThai;
-    }
-
-    return await Tour.find(filter).sort({ createdAt: -1 });
-  }
-
-  static async getTourById(id) {
-    const tour = await Tour.findById(id);
-
-    if (!tour) {
-      throw new Error("Không tìm thấy tour");
-    }
-
-    return tour;
-  }
-
-  //Tạo tour
+  //TẠO TOUR
   static async createTour(data) {
+    if (!data.tenTour) {
+      throw new Error("Thiếu dữ liệu bắt buộc");
+    }
+    const session = await mongoose.startSession(); // tạo một sesion làm việc với mongoose
+    session.startTransaction(); //Bắt đầu một transaction nhiều lệnh database sẽ được coi như 1 gói
     //debug
     console.log("FULL BODY:", data);
     console.log("TourService input:", data.TourServiceModel);
+    
     //code chính
-    // thêm tour
-    const newTour = await Tour.create({
-      tenTour: data.tenTour,
-      diaDiem: data.diaDiem,
-      hinhAnh: data.hinhAnh,
-      thoiLuong: data.thoiLuong,
-      giaNguoiLon: data.giaNguoiLon,
-      giaTreEm: data.giaTreEm,
-      mota: data.mota,
-      diemNoiBat: data.diemNoiBat,
-      loTrinh: data.loTrinh,
-      chitietdichvu: data.chitietdichvu,
-      dieuKhoanDichVu: data.dieuKhoanDichVu,
-      trangThai: data.trangThai,
-    });
-    // Tạo lịch tour
-    let schedules = [];  // tạo mảng rỗng
-    if (data.tourSchedules && data.tourSchedules.length > 0) {  // kiểm tra có tour du lịch hay khỗng và có ít nhất 1 mảng rỗng
-      schedules = await TourSchedule.insertMany(  //  lưu dữ liệu vào bảng TourSchedule vào mảng schedules insertMany() dùng để thêm nhiều document cùng lúc vào collection.
-        data.tourSchedules.map(item => ({ // map() duyệt qua từng phần tử , Mỗi item sẽ được chuyển thành một object mới để lưu vào DB.
-          ngaykhoihanh: item.ngaykhoihanh,
-          ngayketthuc: item.ngayketthuc,
-          Socho: item.Socho,
-          Conlai: item.Socho,
-        }))
-      );
-    }else{
-      schedules = [];  // nếu không có lịch thì trả lại mảng rỗng
-    } 
-    // Tạo  dịch vụ trong bảng Dichvu
-    let services = [];
-    if (data.services?.length > 0) {
-      for (const serviceData of data.services || []) // lặp qua danh sách khi nhập dữ liệu
-      {
-        let newService = await Service.findOne({ // khai báo để tìm tên dv và loại dv  
-          tenDichVu: serviceData.tenDichVu,
-          loaiDichVu: serviceData.loaiDichVu,
-        });
-        if (!newService) {  // nếu khác khai báo thì tạo mới dịch vụ sau đó tạo dịch vụ
-          newService = await Service.create({
-            tenDichVu: serviceData.tenDichVu,
-            loaiDichVu: serviceData.loaiDichVu,
-            noiDungBaoGom: serviceData.noiDungBaoGom,
-            noiDungKhongBaoGom: serviceData.noiDungKhongBaoGom,
-            dieuKhoan: serviceData.dieuKhoan,
-            giaNguoiLon: serviceData.giaNguoiLon ?? 0,
-            giaTreEm: serviceData.giaTreEm ?? 0,
-          });
-        }
-        // tạo chức năng trong bảng tour_dichvu
-        const createdTourService = await TourServiceModel.create({  // tạo vào model TourServiceModel
-          tourId: newTour._id,
-          dichvuId: newService._id,
-          giaapdungnguoilon: serviceData.giaapdungnguoilon ?? newService.giaNguoiLon,
-          giaapdungtreem: serviceData.giaapdungtreem ?? newService.giaTreEm,
-        });
-        services.push(createdTourService); //Gom vào mảng
+    try {
+      // thêm tour
+      const maTour = "TOUR" + Date.now();
+      const newTour = await Tour.create([{
+        maTour,
+        tenTour: data.tenTour,
+        diaDiem: data.diaDiem,
+        hinhAnh: Array.isArray(data.hinhAnh) ? data.hinhAnh : [],
+        thoiLuong: data.thoiLuong,
+        mota: data.mota,
+        diemNoiBat: data.diemNoiBat,
+        loTrinh: data.loTrinh,
+        chitiettour: data.chitiettour,
+        dieuKhoan: data.dieuKhoan,
+        trangThai: data.trangThai,
+      }], { session });  // session ở đây mục đích gom tất cả các db thành 1 gói
+
+      // Tạo lịch tour
+      let schedules = [];  // tạo mảng rỗng
+      if (data.tourSchedules && data.tourSchedules.length > 0) {  // kiểm tra có tour du lịch hay khỗng và có ít nhất 1 mảng rỗng
+        schedules = await TourSchedule.insertMany(  //  lưu dữ liệu vào bảng TourSchedule vào mảng schedules insertMany() dùng để thêm nhiều document cùng lúc vào collection.
+          data.tourSchedules.map(item => ({ // map() duyệt qua từng phần tử , Mỗi item sẽ được chuyển thành một object mới để lưu vào DB.
+            tourId: newTour[0]._id,
+            ngaykhoihanh: item.ngaykhoihanh,
+            ngayketthuc: item.ngayketthuc,
+            Socho: item.Socho,
+            Conlai: item.Socho,
+          })), { session }
+        );
+      } else {
+        schedules = [];  // nếu không có lịch thì trả lại mảng rỗng
       }
+
+      
+      // tạo giá tour
+      let tourPrices = null;
+      if (data.tourPrices) {
+        tourPrices = await TourPrice.create([
+          {
+            tourId: newTour[0]._id,
+            giaNguoiLon: data.tourPrices.giaNguoiLon,
+            giaTreEm: data.tourPrices.giaTreEm
+          }], { session }
+        )
+      }
+
+      data.tourServices.forEach((item, index) => {
+        if (item.giaNguoiLon == null || item.giaNguoiLon === "") {
+          throw new Error(`Thiếu giá người lớn tại dịch vụ ${index}`);
+        }
+
+        if (item.giaTreEm == null || item.giaTreEm === "") {
+          throw new Error(`Thiếu giá trẻ em tại dịch vụ ${index}`);
+        }
+      });
+
+      // tạo gói dịch vụ
+      let tourServices = [];
+      if (data.tourServices && data.tourServices.length > 0) {
+        // Query tất cả dịch vụ gốc 1 lần thay vì query từng cái trong vòng lặp
+        const dichvuIds = data.tourServices.map(item => item.dichvuId);  // Lấy ra danh sách dichvuId từ mảng tourServices
+        const dichvuList = await Service.find(
+          {
+            _id: { $in: dichvuIds }// lấy tất cả dịch vụ có id nằm trong mảng // %in toán tử của mongo = nằm trong danh sách
+          }).session(session);
+
+        // Chuyển thành object để tìm kiếm nhanh theo id
+        const dichvuMap = {};
+        for (let i = 0; i < dichvuList.length; i++) {
+          const dichvu = dichvuList[i]// lấy từng dịch vụ
+          const id = dichvu.id.toString(); // lấy id
+          dichvuMap[id] = dichvu; // gán vào object
+        }
+        tourServices = await TourServiceModel.insertMany(
+          data.tourServices.map(item => {
+            const dichvu = dichvuMap[item.dichvuId.toString()];
+            if (!dichvu) throw new Error(`Không tìm thấy dịch vụ: ${item.dichvuId}`);
+            return {
+              tourId: newTour[0]._id,
+              dichvuId: item.dichvuId,
+              tenDichVuApDung: item.tenDichVuApDung || dichvu.tendichvu,
+              giaApDungNguoiLon: Number(item.giaNguoiLon),
+              giaApDungTreEm: Number(item.giaTreEm),
+              noiDungDichVuBaoGom: item.noiDungDichVuBaoGom || dichvu.noiDungDichVuBaoGom,
+              noiDungDichVuKhongBaoGom: item.noiDungDichVuKhongBaoGom || dichvu.noiDungDichVuKhongBaoGom,
+              dieuKhoan:
+                item.dieuKhoan || dichvu.dieuKhoan
+            };
+          }),
+          { session }
+        );
+      }
+      //commit 
+      await session.commitTransaction(); // tạp hợp các gói lại với nhau
+      session.endSession(); // kết thúc sesion
+      console.log(await TourPrice.find({}));
+      return {
+        tour: newTour[0],       // Dùng newTour thay vì fullTour chưa khai báo
+        schedules,
+        tourPrices,
+        tourServices
+      };
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      throw err;
     }
+  }
+  
+  // tạo loại dịch vụ
+  static async createServiceType(data) {
+    try {
+      const newServiceType = await serviceType.create({
+        loaidichvu: data.loaidichvu.trim()
+      });
+
+      return {
+        newServiceType
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  // tạo gói dịch vụ chung cho toàn hệ thống ( quản lí gói dịch vụ)
+  static async createService(data) {
+    if (!data.tendichvu || !data.tendichvu.trim()) {
+      throw new Error("Tên dịch vụ không hợp lệ");
+    }
+    if (!data.serviceTypeId) {
+      throw new Error("Thiếu loại dịch vụ");
+    }
+    try {
+      const newService = await Service.create({
+        serviceTypeId: data.serviceTypeId,
+        tendichvu: data.tendichvu,
+        moTa: data.moTa,
+        donVi: data.donVi,
+        trangThai: data.trangThai
+      });
+      return newService;
+    } catch (err) {
+      console.log(err);
+      throw new Error("Lỗi khi tạo dịch vụ");
+    }
+  }
+
+
+  // Hiển thị tất cả các tour
+  static async getTourDetail(id) {
+    //Lấy tour chính
+    const tour = await Tour.findById(id);
+    if (!tour) {
+      throw new Error("Không tìm thấy tour");
+    }
+    const tourId = tour._id;
+    //Lấy lịch trình
+    const schedules = await TourSchedule.find({ tourId });
+    //Lấy giá tour
+    const tourPrices = await TourPrice.find({ tourId });
+    
+    //Lấy dịch vụ
+    const tourServices = await TourServiceModel.find({ tourId });
+    // Trả về gộp tất cả
     return {
-      tour: newTour,       // Dùng newTour thay vì fullTour chưa khai báo
-      schedules,           // Đã khai báo bên ngoài vòng lặp
-      services,            // Đã khai báo bên ngoài vòng lặp
+      tour,
+      schedules,
+      tourPrices,
+      tourServices,
     };
   }
 
-
-  static async updateTour(id, data) {
-    const currentTour = await Tour.findById(id);
-
-    if (!currentTour) {
-      throw new Error("Không tìm thấy tour");
-    }
-
-    if (data.maTour && data.maTour !== currentTour.maTour) {
-      const existedTour = await Tour.findOne({ maTour: data.maTour });
-
-      if (existedTour) {
-        throw new Error("Mã tour đã tồn tại");
-      }
-    }
-
-    const updatedTour = await Tour.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          maTour: data.maTour ?? currentTour.maTour,
-          tenTour: data.tenTour ?? currentTour.tenTour,
-          diaDiemTour: data.diaDiemTour ?? currentTour.diaDiemTour,
-          hinhAnh: Array.isArray(data.hinhAnh)
-            ? data.hinhAnh
-            : currentTour.hinhAnh,
-          thoiLuong: data.thoiLuong ?? currentTour.thoiLuong,
-          giaNguoiLon: data.giaNguoiLon ?? currentTour.giaNguoiLon,
-          giaTreEm: data.giaTreEm ?? currentTour.giaTreEm,
-          diemNoiBat: data.diemNoiBat ?? currentTour.diemNoiBat,
-          loTrinh: data.loTrinh ?? currentTour.loTrinh,
-          chiTietDichVuKemTour:
-            data.chiTietDichVuKemTour ?? currentTour.chiTietDichVuKemTour,
-          dieuKhoanDichVu:
-            data.dieuKhoanDichVu ?? currentTour.dieuKhoanDichVu,
-          ngayKhoiHanh:
-            data.ngayKhoiHanh !== undefined
-              ? data.ngayKhoiHanh
-              : currentTour.ngayKhoiHanh,
-          ngayKetThuc:
-            data.ngayKetThuc !== undefined
-              ? data.ngayKetThuc
-              : currentTour.ngayKetThuc,
-          trangThai: data.trangThai ?? currentTour.trangThai,
-          dichVuThem: Array.isArray(data.dichVuThem)
-            ? data.dichVuThem
-            : currentTour.dichVuThem,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    return updatedTour;
-  }
-
-  static async deleteTour(id) {
-    const deletedTour = await Tour.findByIdAndDelete(id);
-    if (!deletedTour) {
-      throw new Error("Không tìm thấy tour");
-    }
-
-    return deletedTour;
-  }
-
-  static async updateTourStatus(id, trangThai) {
-    const updatedTour = await Tour.findByIdAndUpdate(
-      id,
-      { trangThai },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedTour) {
-      throw new Error("Không tìm thấy tour");
-    }
-
-    return updatedTour;
-  }
 }
-
-export default TourService;
+export default TourService; 
