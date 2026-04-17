@@ -35,6 +35,7 @@ export const signUpService = async (data) => {
     return newUser
 }
 
+
 //Đăng nhập bằnhg email và mật khẩu\
 export const logincServices = async (data) => {
     const { email, matkhau } = data;
@@ -99,6 +100,8 @@ export const loginGoogle = async (token) => {
             await user.save();
         }
     }
+
+
     //tạo access token
     const accessToken = jwt.sign(
         {

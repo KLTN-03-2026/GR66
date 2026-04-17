@@ -40,7 +40,6 @@ class TourController {
     }
   }
 
-
   // tạo tour
   static async createTour(req, res) {
     try {
