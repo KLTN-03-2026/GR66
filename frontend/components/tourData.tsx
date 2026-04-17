@@ -20,7 +20,7 @@ export const tourData = {
       "Check-in cảnh đẹp thiên nhiên",
       "Tham gia Fantasy Park",
       "Thưởng thức buffet đặc sản",
-    ],
+    ]
   },
 
   itinerary: [
