@@ -44,14 +44,11 @@ export const loginController = async (req, res) => {
         return res.status(401).json({
             message: err.message
         })
-
     }
 }
-
 export const loginWithGoogle = async (req, res) => {
    try{
         const { token } = req.body
-
         // Gọi hàm xử lý logic (đảm bảo hàm này trả về Object)
         const userData = await loginGoogle(token);
         // Trả về json để Frontend không bị lỗi SyntaxError
@@ -59,7 +56,6 @@ export const loginWithGoogle = async (req, res) => {
             success: true,
             user: userData
         });
-
     }catch(err){
         console.error("Lỗi tại Backend:", err);
         return res.status(500).json({ 
@@ -68,11 +64,14 @@ export const loginWithGoogle = async (req, res) => {
         });
     }
 }
-
 // Đăng xuất
 export const logoutController = async (req, res) => {
      try {
-        const token  = req.cookies?.refreshToken;
+        const refreshToken  = req.cookies?.refreshToken;
+        // gọi service để xóa session và cookie
+        await logoutService(refreshToken);
+        //xóa cookie
+        res.clearCookie("refreshToken");
         return res.status(201).json({
             success: true,
             message: "Đăng xuất thành công",
@@ -86,7 +85,6 @@ export const logoutController = async (req, res) => {
         })
     }
 }
-
 //JWT
 export const authMe = async (req, res) => {
     try {

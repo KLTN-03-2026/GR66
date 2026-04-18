@@ -1,22 +1,3 @@
-# Node modules
-node_modules/
 Backend/node_modules/
-frontend/node_modules/
-
-# Env files
+node_modules/
 .env
-Backend/.env
-frontend/.env
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build files
-dist/
-build/
-
-# OS
-.DS_Store
-Thumbs.db

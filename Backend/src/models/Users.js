@@ -4,7 +4,13 @@ const userSchema = new mongoose.Schema(
   {
     role: {
       type: String,
+<<<<<<< HEAD
       trim: true,
+=======
+      enum: ["Admin", "user"],
+      default: "user",
+      required: true,
+>>>>>>> master
     },
 
     hoten: {
@@ -19,7 +25,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
+<<<<<<< HEAD
     ngaysinh:  {
+=======
+    ngaysinh: {
+>>>>>>> master
       type: Date,
     },
 
@@ -33,7 +43,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true, // cho phép null mà không lỗi unique
     },
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> master
     sdt: {
       type: String,
     },
@@ -53,6 +67,10 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
+<<<<<<< HEAD
+=======
+    collection: "users",
+>>>>>>> master
     timestamps: {
       createdAt: "thoigiantao",
       updatedAt: "thoigiancapnhat",
@@ -60,6 +78,11 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+<<<<<<< HEAD
 const User = mongoose.model("Users", userSchema);
 
 export default User;
+=======
+const User = mongoose.model("User", userSchema);
+export default User;
+>>>>>>> master
