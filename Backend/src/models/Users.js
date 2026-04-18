@@ -53,6 +53,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
+    collection: "users",
     timestamps: {
       createdAt: "thoigiantao",
       updatedAt: "thoigiancapnhat",
@@ -60,6 +61,5 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("Users", userSchema);
-
+const User = mongoose.model("User", userSchema);
 export default User;

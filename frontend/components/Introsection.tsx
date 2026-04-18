@@ -29,6 +29,7 @@ export default function IntroSection() {
     initializeUser(); // Gọi hàm khởi tạo
   }, []);
 
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Video */}

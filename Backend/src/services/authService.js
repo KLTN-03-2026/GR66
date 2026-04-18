@@ -23,7 +23,7 @@ export const signUpService = async (data) => {
     const hashPassword = await bcrypt.hash(matkhau, 10); // salt = 10 2^10 số lần trộn
     // tạo user mới
     const newUser = await User.create({
-        role,
+        role: "user",
         hoten,
         email,
         ngaysinh,
@@ -101,9 +101,13 @@ export const loginGoogle = async (token) => {
     }
     //tạo access token
     const accessToken = jwt.sign(
-        { userId: user._id },
+        {
+            userId: user._id
+        },
         process.env.JWT_SECRET,
-        { expiresIn: ACCESS_TOKEN_TTL }
+        {
+            expiresIn: ACCESS_TOKEN_TTL
+        }
     );
 
     //tạo refresh token
