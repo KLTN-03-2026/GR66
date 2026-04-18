@@ -3,24 +3,30 @@ import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { checkTokenExpiration, logout} from "@/app/lib/authService";
-import { useNavigate } from "react-router-dom";
 
 export default function IntroSection() {
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [open, setOpen] = useState(false);
 
+
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const accessToken = localStorage.getItem("accessToken");
-    if (storedUser && accessToken) {
-      setUser(JSON.parse(storedUser));
-      checkTokenExpiration();
-    } else {
-      // nếu thiếu 1 trong 2 coi như chưa login
-      localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
-      setUser(null);
-    }
+    const initializeUser = () => {
+      const storedUser = localStorage.getItem("user");
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (storedUser && accessToken) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser); // Cập nhật state user
+        checkTokenExpiration(); // Kiểm tra token
+      } else {
+        // Xóa thông tin nếu không hợp lệ
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        setUser(null);
+      }
+    };
+
+    initializeUser(); // Gọi hàm khởi tạo
   }, []);
 
   return (
