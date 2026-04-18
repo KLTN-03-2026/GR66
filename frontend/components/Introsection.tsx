@@ -85,7 +85,7 @@ export default function IntroSection() {
 
           {user ? (
             //Nếu đã đăng nhập
-            <div className="relative">
+<div className="relative">
               {/* Email */}
               <span
                 className="text-white text-sm bg-transparent cursor-pointer"
@@ -130,6 +130,7 @@ export default function IntroSection() {
 
       {/* Nội dung chính */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6 pt-8">   {/* Giảm pt để dịch lên */}
+
         {/* Tiêu đề - Chỉ dịch lên cao hơn, không thay đổi font size */}
         <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-thin tracking-wider leading-none mb-10">
           Những hành trình
@@ -153,7 +154,6 @@ export default function IntroSection() {
               />
             </div>
             <button className="bg-blue-500 hover:bg-blue-600 text-white px-14 py-6 text-lg font-medium transition rounded-r-2xl whitespace-nowrap">
-              Khám phá
             </button>
           </div>
         </div>
