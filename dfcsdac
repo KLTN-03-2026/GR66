@@ -1,0 +1,14 @@
+[33m20efeeb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevbao[m[33m, [m[1;31msource/main[m[33m, [m[1;31msource/feature[m[33m, [m[1;31msource/HEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/feature[m[33m, [m[1;31morigin/devbao[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to source/main
+[33mc413ac9[m HEAD@{1}: checkout: moving from devbao to devbao
+[33mc413ac9[m HEAD@{2}: pull origin devbao --rebase (finish): returning to refs/heads/devbao
+[33mc413ac9[m HEAD@{3}: pull origin devbao --rebase (start): checkout c413ac9bcb733b515afde84eb3d27bdb3a9a8fdd
+[33m5044297[m[33m ([m[1;31msource/devbao[m[33m)[m HEAD@{4}: commit: add new code
+[33m02d018d[m HEAD@{5}: commit: bao update
+[33m820e9cd[m HEAD@{6}: merge source/devbao: Fast-forward
+[33m0fa2033[m HEAD@{7}: checkout: moving from devbao to devbao
+[33m0fa2033[m HEAD@{8}: checkout: moving from devbao to devbao
+[33m0fa2033[m HEAD@{9}: commit: bao update jwt
+[33m36d1148[m HEAD@{10}: pull origin devbao: Fast-forward
+[33m20efeeb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevbao[m[33m, [m[1;31msource/main[m[33m, [m[1;31msource/feature[m[33m, [m[1;31msource/HEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/feature[m[33m, [m[1;31morigin/devbao[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{11}: checkout: moving from devbao to devbao
+[33m20efeeb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevbao[m[33m, [m[1;31msource/main[m[33m, [m[1;31msource/feature[m[33m, [m[1;31msource/HEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/feature[m[33m, [m[1;31morigin/devbao[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{12}: checkout: moving from main to devbao
+[33m20efeeb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevbao[m[33m, [m[1;31msource/main[m[33m, [m[1;31msource/feature[m[33m, [m[1;31msource/HEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/feature[m[33m, [m[1;31morigin/devbao[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{13}: clone: from https://github.com/BaoIT2004/Xay-dung-website-dat-tour-du-lich-tich-hop-he-thong-goi-y-dua-tren-ai.git
