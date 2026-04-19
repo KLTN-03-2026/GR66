@@ -18,7 +18,7 @@ class TourService {
     //debug
     console.log("FULL BODY:", data);
     console.log("TourService input:", data.TourServiceModel);
-    
+
     //code chính
     try {
       // thêm tour
@@ -53,7 +53,7 @@ class TourService {
         schedules = [];  // nếu không có lịch thì trả lại mảng rỗng
       }
 
-      
+
       // tạo giá tour
       let tourPrices = null;
       if (data.tourPrices) {
@@ -128,7 +128,7 @@ class TourService {
       throw err;
     }
   }
-  
+
   // tạo loại dịch vụ
   static async createServiceType(data) {
     try {
@@ -179,7 +179,7 @@ class TourService {
     const schedules = await TourSchedule.find({ tourId });
     //Lấy giá tour
     const tourPrices = await TourPrice.find({ tourId });
-    
+
     //Lấy dịch vụ
     const tourServices = await TourServiceModel.find({ tourId });
     // Trả về gộp tất cả
@@ -189,6 +189,32 @@ class TourService {
       tourPrices,
       tourServices,
     };
+  }
+  // Hiển thị danh sách tour ngoài giao diện
+  static async getAllTours() {
+    const tours = await Tour.find({ trangThai: "Hoạt động" }).sort({ createdAt: -1 });
+
+    const result = await Promise.all(
+      tours.map(async (tour) => {
+        // lấy 1 giá tour
+        const tourPrice = await TourPrice.findOne({ tourId: tour._id });
+
+        // lấy lịch khởi hành gần nhất
+        const schedule = await TourSchedule.findOne({ tourId: tour._id })
+          .sort({ ngaykhoihanh: 1 });
+
+        return {
+          _id: tour._id,
+          diaDiem: tour.diaDiem,
+          tenTour: tour.tenTour,
+          hinhAnh: tour.hinhAnh,
+          giaTour: tourPrice ? tourPrice.giaNguoiLon : 0,
+          ngayKhoiHanh: schedule ? schedule.ngaykhoihanh : null,
+        };
+      })
+    );
+
+    return result;
   }
 
 }
