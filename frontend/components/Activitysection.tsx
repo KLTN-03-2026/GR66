@@ -56,6 +56,15 @@ export default function ActivitySection() {
       </div>
     );
   }
+  const getImageUrl = (images?: string[]) => {
+  const firstImage = images?.[0];
+
+  if (!firstImage) return "/images/default-tour.jpg";
+
+  if (firstImage.startsWith("http")) return firstImage;
+
+  return `http://localhost:3001/${firstImage.replace(/^\/+/, "")}`;
+};
 
   return (
     <div className="py-16 bg-white">
