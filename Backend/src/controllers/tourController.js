@@ -3,6 +3,7 @@ import TourService from "../services/tourService.js";
 import Service from "../models/service.js";
 import Tour from "../models/Tour.js";
 
+
 class TourController {
   static async getAllTours(req, res) {
     try {
@@ -47,7 +48,7 @@ class TourController {
       const data = req.body;
 
       data.hinhAnh = req.files
-        ? req.files.map(file => file.path)
+          ? req.files.map(file => file.filename)
         : [];
       // Validate input cơ bản
       if (!req.body || Object.keys(req.body).length === 0) {
@@ -77,6 +78,9 @@ class TourController {
       });
     }
   }
+
+
+
   // tạo loại dịch vụ 
   static async createServiceType(req, res) {
     try {
