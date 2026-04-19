@@ -111,26 +111,17 @@ function BookingContent() {
 
             {/* ===== LEFT ===== */}
             <div className="col-span-2 space-y-6">
-
-
-
               {/* DESCRIPTION */}
               <div className="bg-white rounded-xl p-5 shadow-sm">
-
-
                 <div className="text-sm text-gray-600">
                   <h1 className="font-semibold text-lg text-gray-800 mb-2">
                     Điểm nổi bật
                   </h1>
                   <ul className="list-disc pl-5 space-y-1">
-                    {tourData.description.highlights.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
+                    {tour.diemNoiBat}
                   </ul>
                 </div>
               </div>
-              {/* DESCRIPTION end-----------------------------------------------------------------------------------------*/}
-
 
               {/* ITINERARY */}
               <div className="bg-white rounded-xl p-5 shadow-sm">
@@ -139,12 +130,7 @@ function BookingContent() {
                 </h2>
 
                 <ul className="text-sm text-gray-600 space-y-1 overflow-hidden">
-                  {(showFullItinerary
-                    ? tourData.itinerary
-                    : tourData.itinerary.slice(0, 5)
-                  ).map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))}
+                  {tour.loTrinh}
                 </ul>
 
                 {tourData.itinerary.length > 5 && (
@@ -159,41 +145,36 @@ function BookingContent() {
                   </div>
                 )}
               </div>
-              {/* ITINERARY end -------------------------------------------------------------------- */}
-
-
 
               <div className="space-y-6">
 
                 {/* INCLUDED SERVICES */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm border">
                   <h3 className="font-semibold text-gray-800 mb-3">
-                    Chi tiết dịch vụ bao gồm
+                    Chi tiết tour bao gồm
                   </h3>
                   <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
-                    {tourData.included.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
+                    {tour.chitiettour}
                   </ul>
                 </div>
 
-                {/* EXTRA SERVICES */}
+                {/* Dịch vụ thêm */}
 
-                {tourData.extra.map((service) => {
-                  const isSelected = selectedExtras.includes(service.id);
-                  const isExpanded = expandedExtras.includes(service.id);
+                {tourData.extra.map((services) => {
+                  const isSelected = selectedExtras.includes(services.id);
+                  const isExpanded = expandedExtras.includes(services.id);
 
                   return (
                     <div
-                      key={service.id}
+                      key={services.id}
                       className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
                     >
                       <h3 className="font-semibold text-gray-800 mb-3">
-                        {service.title}
+                        {services.title}
                       </h3>
 
                       <p className="font-medium text-gray-700 mb-3">
-                        Dịch vụ thêm: {service.type}
+                        Loại dịch vụ: {services.type}
                       </p>
 
                       <div className="text-sm text-gray-600">
@@ -209,7 +190,7 @@ function BookingContent() {
                               : {}
                           }
                         >
-                          {service.included?.map((item, index) => (
+                          {services.included?.map((item, index) => (
                             <p key={index}>• {item}</p>
                           ))}
                         </div>
@@ -222,7 +203,7 @@ function BookingContent() {
                               Dịch vụ không bao gồm
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
-                              {service.notIncluded?.map((item, index) => (
+                              {services.notIncluded?.map((item, index) => (
                                 <li key={index}>{item}</li>
                               ))}
                             </ul>
@@ -233,7 +214,7 @@ function BookingContent() {
                               Điều khoản
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
-                              {service.terms?.map((item, index) => (
+                              {services.terms?.map((item, index) => (
                                 <li key={index}>{item}</li>
                               ))}
                             </ul>
@@ -245,7 +226,7 @@ function BookingContent() {
                                 Giá dịch vụ đối với người lớn
                               </p>
                               <p className="font-semibold text-red-500">
-                                {service.adultPrice.toLocaleString()} đ
+                                {services.adultPrice.toLocaleString()} đ
                               </p>
                             </div>
 
@@ -254,7 +235,7 @@ function BookingContent() {
                                 Giá dịch vụ đối với trẻ em
                               </p>
                               <p className="font-semibold text-red-500">
-                                {service.childPrice.toLocaleString()} đ
+                                {services.childPrice.toLocaleString()} đ
                               </p>
                             </div>
                           </div>
@@ -263,7 +244,7 @@ function BookingContent() {
 
                       <div className="mt-[10px] flex justify-between items-center gap-4">
                         <button
-                          onClick={() => toggleExtraDetail(service.id)}
+                          onClick={() => toggleExtraDetail(services.id)}
                           className="text-sm italic underline text-gray-700 hover:text-black transition"
                         >
                           {isExpanded
@@ -274,12 +255,12 @@ function BookingContent() {
                         <div className="flex items-center gap-4 shrink-0">
                           {!isExpanded && (
                             <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
-                              đ {service.adultPrice.toLocaleString()}
+                              đ {services.adultPrice.toLocaleString()}
                             </p>
                           )}
 
                           <button
-                            onClick={() => toggleExtra(service.id)}
+                            onClick={() => toggleExtra(services.id)}
                             className={`px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
                               ? "bg-green-600 hover:bg-green-700 text-white"
                               : "bg-blue-500 hover:bg-blue-600 text-white"
@@ -304,12 +285,7 @@ function BookingContent() {
                 <div className="text-sm text-gray-600 space-y-3">
                   <div>
                     <ul className="list-disc pl-5 space-y-1">
-                      {(showFullTerms
-                        ? tourData.terms
-                        : tourData.terms.slice(0, 4)
-                      ).map((item, index) => (
-                        <li key={index}>{item}</li>
-                      ))}
+                      {tour.dieuKhoan}
                     </ul>
                   </div>
                 </div>
