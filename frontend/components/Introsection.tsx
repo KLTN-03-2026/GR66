@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { checkTokenExpiration, logout} from "@/app/lib/authService";
-import { useNavigate } from "react-router-dom";
 
 export default function IntroSection() {
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [open, setOpen] = useState(false);
+
 
   useEffect(() => {
     const initializeUser = () => {

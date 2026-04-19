@@ -6,83 +6,68 @@ import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FaMapMarkerAlt } from "react-icons/fa";
-
-
-
+import {
+  useBooking,
+  useExtraDetail,
+  useSelectedExtras,
+  useAdultCount,
+  useReview,
+  useTourDetail
+} from "@/hooks/useBooking";
+import { useParams } from "next/navigation";
 
 /* ============ MAIN CONTENT ============ */
 function BookingContent() {
+
   const [showFullTerms, setShowFullTerms] = useState(false);
   const [showFullItinerary, setShowFullItinerary] = useState(false);
-  const [adult, setAdult] = useState(1);
-  const [child, setChild] = useState(0);
-  const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
-  const [checkInDate, setCheckInDate] = useState("");
-  const [checkInError, setCheckInError] = useState("");
-  const today = new Date().toISOString().split("T")[0];
-  const [expandedExtras, setExpandedExtras] = useState<number[]>([]);
-  const toggleExtraDetail = (id: number) => {
-    if (expandedExtras.includes(id)) {
-      setExpandedExtras((prev) => prev.filter((item) => item !== id));
-    } else {
-      setExpandedExtras((prev) => [...prev, id]);
-    }
-  };
-  const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = e.target.value;
 
-    if (selectedDate < today) {
-      setCheckInError("Không thể chọn ngày trước hôm nay");
-      setCheckInDate("");
-      return;
-    }
+  // bật tắt thêm chi tiết thông tin
+  const { expandedExtras, toggleExtraDetail } = useExtraDetail();
 
-    setCheckInError("");
-    setCheckInDate(selectedDate);
-  };
+  // Kiểm tra ngày người dùng với ngày hiện tại
+  const { checkInDate, checkInError, handleCheckInChange,today } = useBooking();
 
-  const toggleExtra = (id: number) => {
-    if (selectedExtras.includes(id)) {
-      setSelectedExtras((prev) => prev.filter((item) => item !== id));
-    } else {
-      setSelectedExtras((prev) => [...prev, id]);
-    }
-  };
-  const baseAdultCount = adult > 0 ? adult : 1;
+  // chọn bỏ dịch vụ thêm , chọn nhiều option trong form, xử lý checkbox list
+  const { selectedExtras, setSelectedExtras , toggleExtra} = useSelectedExtras ();
+  
+  // đảm bảo số lượng người lớn tối thiểu là 1
+  const {adult,setAdult,child,setChild,baseAdultCount} = useAdultCount();
 
-  let extraTotal = 0;
-
+  // tính tổng tiền các dịch vụ thêm mà người dùng đã chọn
+  let extraTotal = 0; // tạo biến để cộng dồn tiền dịch vụ thêm
   tourData.extra.forEach((service) => {
-    if (selectedExtras.includes(service.id)) {
+    if (selectedExtras.includes(service.id)) { // kiểm tra xem dịch vụ này có được user chọn không
       extraTotal += service.adultPrice * adult + service.childPrice * child;
     }
   });
+  //tính tổng tiền tour cuối cùng cho người dùng
+  const totalPrice = tourData.adultPrice * baseAdultCount + tourData.childPrice * child + extraTotal;
+  //dùng để gom toàn bộ logic xử lý phần review (đánh giá) lại một chỗ,
+  const { review, totalReviews, averageRating, visibleReviews, handleLoadMore } = useReview();
 
-  const totalPrice =
-    tourData.adultPrice * baseAdultCount +
-    tourData.childPrice * child +
-    extraTotal;
+  const { tour, schedules, price, services, loading, error } = useTourDetail();
 
-  const review = tourData.reviewSection;
+  //Test
+  console.log("=== TOUR DETAIL ===");
+  console.log("loading:", loading);
+  console.log("error:", error);
+  console.log("tour:", tour);
+  console.log("schedules:", schedules);
+  console.log("price:", price);
+  console.log("services:", services);
 
-  const totalReviews = review.list.length;
-
-
-  const averageRating = totalReviews > 0
-    ? review.list.reduce((sum, item) => sum + item.rating, 0) / totalReviews
-    : 0;
-  const [visibleReviews, setVisibleReviews] = useState(4);
-
-  const handleLoadMore = () => {
-    setVisibleReviews(prev => Math.min(prev + 4, review.list.length));
-  };
+  if (loading) return <p className="p-8">Đang tải...</p>;
+  if (error) return <p className="p-8 text-red-500">Lỗi: {error}</p>;
+  if (!tour) return <p className="p-8">Không tìm thấy tour</p>;
+  
   return (
     <div className="bg-gray-50 min-h-screen pb-30">
       <div className="max-w-6xl mx-auto p-6 ">
-
+ 
         {/* TITLE */}
         <h1 className="text-2xl font-semibold text-gray-800 ">
-          {tourData.title}
+          {tour.tenTour}
         </h1>
         <div className="flex">
           <p className="text-sm text-gray-500 mt-1 mb-3  ">
@@ -91,29 +76,28 @@ function BookingContent() {
 
           <h2 className="text-sm text-gray-500 mt-1 mb-3 ml-8 flex items-center gap-1">
             <FaMapMarkerAlt className="text-red-500" />
-            {tourData.location}
+            {tour.diaDiem}
           </h2>
         </div>
 
         {/* IMAGES review---------------------------------------------------------------------------------- */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 h-[400px] relative">
-            <Image
-              src={tourData.images[0]}
-              alt=""
-              fill
-              className="rounded-xl object-cover"
-            />
-          </div>
+          {tour?.hinhAnh?.[0] && (
+            <div className="col-span-2 h-[400px] relative">
+              <img
+                src={`http://localhost:3001/uploads/${tour.hinhAnh[0]}`}
+                className="rounded-xl object-cover w-full h-full"
+              />
+            </div>
+          )}
 
+          {/* Ảnh nhỏ */}
           <div className="grid grid-cols-2 gap-4 mt-3.5">
-            {tourData.images.slice(1).map((img, index) => (
+            {tour?.hinhAnh?.slice(1)?.map((img, index) => (
               <div key={index} className="relative h-[160px]">
-                <Image
-                  src={img}
-                  alt=""
-                  fill
-                  className="rounded-xl object-cover"
+                <img
+                  src={`http://localhost:3001/uploads/${img}`}
+                  className="rounded-xl object-cover w-full h-full"
                 />
               </div>
             ))}
