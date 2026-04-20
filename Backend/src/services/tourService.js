@@ -166,8 +166,7 @@ class TourService {
     }
   }
 
-
-  // Hiển thị tất cả các tour
+  // Hiển thị thông tin cần thiết trong chức năng đặt tour
   static async getTourDetail(id) {
     //Lấy tour chính
     const tour = await Tour.findById(id);
@@ -179,7 +178,6 @@ class TourService {
     const schedules = await TourSchedule.find({ tourId });
     //Lấy giá tour
     const tourPrices = await TourPrice.find({ tourId });
-    
     //Lấy dịch vụ
     const tourServices = await TourServiceModel.find({ tourId });
     // Trả về gộp tất cả
