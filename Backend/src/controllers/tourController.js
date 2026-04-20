@@ -21,6 +21,7 @@ class TourController {
       });
     }
   }
+  
   static async getTourById(req, res) {
     try {
       const { id } = req.params;

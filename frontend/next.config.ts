@@ -8,10 +8,10 @@ const nextConfig: NextConfig = {
         protocol: "http",
         hostname: "localhost",
         port: "3001", //backend 
-        pathname: "/uploads/**",
+        pathname: "/uploads/**"
       },
     ],
   },
 };
-
 export default nextConfig;
+
