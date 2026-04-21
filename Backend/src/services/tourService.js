@@ -215,5 +215,128 @@ class TourService {
     return result;
   }
 
+  // cập nhật tour
+  static async updateTour(id, data) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+  
+    try {
+      const tour = await Tour.findById(id).session(session);
+  
+      if (!tour) {
+        throw new Error("Không tìm thấy tour");
+      }
+  
+      // cập nhật bảng Tour
+      tour.tenTour = data.tenTour ?? tour.tenTour;
+      tour.diaDiem = data.diaDiem ?? tour.diaDiem;
+      tour.thoiLuong = data.thoiLuong ?? tour.thoiLuong;
+      tour.mota = data.mota ?? tour.mota;
+      tour.diemNoiBat = data.diemNoiBat ?? tour.diemNoiBat;
+      tour.loTrinh = data.loTrinh ?? tour.loTrinh;
+      tour.chitiettour = data.chitiettour ?? tour.chitiettour;
+      tour.dieuKhoan = data.dieuKhoan ?? tour.dieuKhoan;
+      tour.trangThai = data.trangThai ?? tour.trangThai;
+  
+      // chỉ cập nhật ảnh nếu có gửi ảnh mới
+      if (data.hinhAnh && Array.isArray(data.hinhAnh) && data.hinhAnh.length > 0) {
+        tour.hinhAnh = data.hinhAnh;
+      }
+  
+      await tour.save({ session });
+  
+      // cập nhật bảng giá
+      if (data.tourPrices) {
+        let tourPrice = await TourPrice.findOne({ tourId: id }).session(session);
+  
+        if (tourPrice) {
+          tourPrice.giaNguoiLon = data.tourPrices.giaNguoiLon ?? tourPrice.giaNguoiLon;
+          tourPrice.giaTreEm = data.tourPrices.giaTreEm ?? tourPrice.giaTreEm;
+          await tourPrice.save({ session });
+        } else {
+          await TourPrice.create(
+            [
+              {
+                tourId: id,
+                giaNguoiLon: data.tourPrices.giaNguoiLon,
+                giaTreEm: data.tourPrices.giaTreEm,
+              },
+            ],
+            { session }
+          );
+        }
+      }
+  
+      // cập nhật lịch tour
+      if (data.tourSchedules && Array.isArray(data.tourSchedules)) {
+        await TourSchedule.deleteMany({ tourId: id }, { session });
+  
+        if (data.tourSchedules.length > 0) {
+          await TourSchedule.insertMany(
+            data.tourSchedules.map((item) => ({
+              tourId: id,
+              ngaykhoihanh: item.ngaykhoihanh,
+              ngayketthuc: item.ngayketthuc,
+              Socho: item.Socho,
+              Conlai: item.Conlai ?? item.Socho,
+            })),
+            { session }
+          );
+        }
+      }
+  
+      // cập nhật dịch vụ của tour
+      if (data.tourServices && Array.isArray(data.tourServices)) {
+        await TourServiceModel.deleteMany({ tourId: id }, { session });
+  
+        if (data.tourServices.length > 0) {
+          const dichvuIds = data.tourServices.map((item) => item.dichvuId);
+  
+          const dichvuList = await Service.find({
+            _id: { $in: dichvuIds },
+          }).session(session);
+  
+          const dichvuMap = {};
+          for (let i = 0; i < dichvuList.length; i++) {
+            const dichvu = dichvuList[i];
+            dichvuMap[dichvu._id.toString()] = dichvu;
+          }
+  
+          const newTourServices = data.tourServices.map((item) => {
+            const dichvu = dichvuMap[item.dichvuId.toString()];
+  
+            if (!dichvu) {
+              throw new Error(`Không tìm thấy dịch vụ: ${item.dichvuId}`);
+            }
+  
+            return {
+              tourId: id,
+              dichvuId: item.dichvuId,
+              tenDichVuApDung: item.tenDichVuApDung || dichvu.tendichvu,
+              giaApDungNguoiLon: Number(item.giaNguoiLon),
+              giaApDungTreEm: Number(item.giaTreEm),
+              noiDungDichVuBaoGom:
+                item.noiDungDichVuBaoGom || dichvu.noiDungDichVuBaoGom,
+              noiDungDichVuKhongBaoGom:
+                item.noiDungDichVuKhongBaoGom || dichvu.noiDungDichVuKhongBaoGom,
+              dieuKhoan: item.dieuKhoan || dichvu.dieuKhoan,
+            };
+          });
+  
+          await TourServiceModel.insertMany(newTourServices, { session });
+        }
+      }
+  
+      await session.commitTransaction();
+      session.endSession();
+  
+      return await this.getTourDetail(id);
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+  }
+
 }
 export default TourService; 

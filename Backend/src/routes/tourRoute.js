@@ -16,7 +16,9 @@ router.post('/create/services', TourController.createService )
 // tạo gói dịch vụ cho từng loại tour
 router.post('/create/tourService', TourController.createTourService)
 //Hiển thị các thông tin tour
-router.get("/view/:id", TourController.viewTour);   
+router.get("/view/:id", TourController.viewTour);  
+// sửa tour
+router.put("/update/:id", upload.array("hinhAnh"), TourController.updateTour); 
 
 
 

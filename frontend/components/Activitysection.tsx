@@ -56,15 +56,6 @@ export default function ActivitySection() {
       </div>
     );
   }
-  const getImageUrl = (images?: string[]) => {
-  const firstImage = images?.[0];
-
-  if (!firstImage) return "/images/default-tour.jpg";
-
-  if (firstImage.startsWith("http")) return firstImage;
-
-  return `http://localhost:3001/${firstImage.replace(/^\/+/, "")}`;
-};
 
   return (
     <div className="py-16 bg-white">
@@ -91,13 +82,12 @@ export default function ActivitySection() {
                   ? `http://localhost:3001/uploads/${item.hinhAnh[0]}`
                   : null;
 
-              console.log("Tên ảnh:", item.hinhAnh?.[0]);
-              console.log("URL ảnh:", imageUrl);
-
               return (
-                <div
+                <Link
                   key={item._id}
-                  className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 cursor-pointer"
+                  // ===== SỬA: truyền id bằng query string để khớp với useSearchParams() =====
+                  href={`/user/booking?tourId=${item._id}`}
+                  className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 cursor-pointer block"
                 >
                   <div className="relative h-56 overflow-hidden bg-gray-100">
                     {imageUrl ? (
@@ -138,7 +128,7 @@ export default function ActivitySection() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

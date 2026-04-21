@@ -6,6 +6,10 @@ import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { vi } from "date-fns/locale";
+import { useEffect } from "react";
 import {
   useBooking,
   useExtraDetail,
@@ -21,19 +25,19 @@ function BookingContent() {
 
   const [showFullLoTrinh, setShowFullLoTrinh] = useState(false);
   const [showFullDieuKhoan, setShowFullDieuKhoan] = useState(false);
-  const [showFullChitiettour, setShowFullChitiettour] = useState(false);  
+  const [showFullChitiettour, setShowFullChitiettour] = useState(false);
 
   // bật tắt thêm chi tiết thông tin
   const { expandedExtras, toggleExtraDetail } = useExtraDetail();
 
   // Kiểm tra ngày người dùng với ngày hiện tại
-  const { checkInDate, checkInError, handleCheckInChange,today } = useBooking();
+  const { checkInDate, checkInError, handleCheckInChange, today } = useBooking();
 
   // chọn bỏ dịch vụ thêm , chọn nhiều option trong form, xử lý checkbox list
-  const { selectedExtras, setSelectedExtras , toggleExtra} = useSelectedExtras ();
-  
+  const { selectedExtras, setSelectedExtras, toggleExtra } = useSelectedExtras();
+
   // đảm bảo số lượng người lớn tối thiểu là 1
-  const {adult,setAdult,child,setChild,baseAdultCount} = useAdultCount();
+  const { adult, setAdult, child, setChild, baseAdultCount } = useAdultCount();
 
   // tính tổng tiền các dịch vụ thêm mà người dùng đã chọn
   let extraTotal = 0; // tạo biến để cộng dồn tiền dịch vụ thêm
@@ -48,6 +52,17 @@ function BookingContent() {
   const { review, totalReviews, averageRating, visibleReviews, handleLoadMore } = useReview();
 
   const { tour, schedules, price, services, loading, error } = useTourDetail();
+  const validScheduleDates =
+    schedules?.map((item) =>
+      new Date(item.ngaykhoihanh).toISOString().split("T")[0]
+    ) || [];
+
+  const firstScheduleDate =
+    schedules && schedules.length > 0
+      ? new Date(schedules[0].ngaykhoihanh)
+        .toISOString()
+        .split("T")[0]
+      : "";
 
   //Test
   console.log("=== TOUR DETAIL ===");
@@ -61,11 +76,11 @@ function BookingContent() {
   if (loading) return <p className="p-8">Đang tải...</p>;
   if (error) return <p className="p-8 text-red-500">Lỗi: {error}</p>;
   if (!tour) return <p className="p-8">Không tìm thấy tour</p>;
-  
+
   return (
     <div className="bg-gray-50 min-h-screen pb-30">
       <div className="max-w-6xl mx-auto p-6 ">
- 
+
         {/* TITLE */}
         <h1 className="text-2xl font-semibold text-gray-800 ">
           {tour.tenTour}
@@ -112,8 +127,19 @@ function BookingContent() {
 
             {/* ===== LEFT ===== */}
             <div className="col-span-2 space-y-6">
-              {/* DESCRIPTION */}
-              <div className="bg-white rounded-xl p-5 shadow-sm">
+              {/* DESCRIPTION 1 */}
+              <div className="bg-white rounded-xl p-5 shadow-sm border-1 border-gray-400">
+                <div className="text-sm text-gray-600">
+                  <h1 className="font-semibold text-lg text-gray-800 mb-2">
+                    Mô tả
+                  </h1>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {tour.mota}
+                  </ul>
+                </div>
+              </div>
+              {/* DESCRIPTION 2 */}
+              <div className="bg-white rounded-xl p-5 shadow-sm border-1 border-gray-400">
                 <div className="text-sm text-gray-600">
                   <h1 className="font-semibold text-lg text-gray-800 mb-2">
                     Điểm nổi bật
@@ -125,11 +151,11 @@ function BookingContent() {
               </div>
 
               {/* ITINERARY */}
-              <div className="bg-white rounded-xl p-5 shadow-sm">
+              <div className="bg-white rounded-xl p-5 shadow-sm border-1 border-gray-400">
                 <h2 className="font-semibold text-lg text-gray-800 mb-3">
                   Lộ trình
                 </h2>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed pl-5">
                   {(() => {
                     const maxLength = 300;
                     const text = tour.loTrinh || "";
@@ -153,12 +179,12 @@ function BookingContent() {
               <div className="space-y-6">
 
                 {/* INCLUDED SERVICES */}
-                <div className="bg-white rounded-xl p-5 shadow-sm">
+                <div className="bg-white rounded-xl p-5 shadow-sm border-1 border-gray-400">
                   <h2 className="font-semibold text-lg text-gray-800 mb-3">
                     Chi tiết tour bao gồm
                   </h2>
 
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed pl-5">
                     {(() => {
                       const maxLength = 500;
                       const text = tour?.chitiettour || "";
@@ -183,11 +209,11 @@ function BookingContent() {
                 </div>
 
                 {/*============= ĐIỀU KHOẢN ===========================================*/}
-                <div className="bg-white rounded-xl p-5 shadow-sm">
+                <div className="bg-white rounded-xl p-5 shadow-sm border-1 border-gray-400">
                   <h2 className="font-semibold text-lg text-gray-800 mb-3">
                     Điều khoản sử dụng
                   </h2>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed pl-5">
                     {(() => {
                       const maxLength = 300;
                       const text = tour.dieuKhoan || "";
@@ -197,7 +223,6 @@ function BookingContent() {
                         : text.slice(0, maxLength) + (isLongText ? "..." : "");
                     })()}
                   </p>
-
                   {tour.dieuKhoan?.length > 300 && (
                     <div className="flex justify-end mt-4">
                       <span
@@ -220,7 +245,7 @@ function BookingContent() {
                   return (
                     <div
                       key={services.id}
-                      className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
+                      className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col border-1 border-gray-400"
                     >
                       <h3 className="font-semibold text-gray-800 mb-3">
                         {services.title}
@@ -230,7 +255,7 @@ function BookingContent() {
                         Loại dịch vụ: {services.type}
                       </p>
 
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 pl-5">
                         <div
                           className="overflow-hidden"
                           style={
@@ -326,7 +351,7 @@ function BookingContent() {
                     </div>
                   );
                 })}
-                
+
               </div>
 
             </div>
@@ -336,7 +361,7 @@ function BookingContent() {
 
 
             {/* ===== RIGHT BOOKING ===== */}
-            <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm 
+            <div className="bg-white border rounded-2xl p-6 h-fit shadow-sm  border-1 border-gray-400
                 sticky top-24 z-40">
               <p className="font-semibold text-2xl text-gray-800 mb-6">
                 Tổng tiền: <span className="text-blue-600">{totalPrice.toLocaleString()} đ</span>
@@ -344,15 +369,36 @@ function BookingContent() {
 
               <div className="mb-3">
                 <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">
-                  Check-in
+                  Ngày khởi hành
                 </span>
                 <input
                   type="date"
                   value={checkInDate}
-                  min={today}
-                  onChange={handleCheckInChange}
+                  min={validScheduleDates[0] || ""}
+                  max={validScheduleDates[validScheduleDates.length - 1] || ""}
+                  onChange={(e) => {
+                    const selectedDate = e.target.value;
+
+                    if (validScheduleDates.includes(selectedDate)) {
+                      handleCheckInChange(e);
+                    } else {
+                      alert("Bạn chỉ được chọn đúng ngày khởi hành có sẵn của tour");
+                    }
+                  }}
                   className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-500"
                 />
+                {validScheduleDates.length > 0 && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p className="font-medium mb-1">Ngày khởi hành có sẵn:</p>
+                    <ul className="list-disc pl-5">
+                      {validScheduleDates.map((date, index) => (
+                        <li key={index}>
+                          {new Date(date).toLocaleDateString("vi-VN")}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {checkInError && (
                   <p className="text-red-500 text-sm mt-2">{checkInError}</p>
@@ -448,13 +494,13 @@ function BookingContent() {
           </div>
 
           {/* ===== List review ===== */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="reviews-container">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 " id="reviews-container ">
             {review.list.slice(0, visibleReviews).map((item) => (
               <div
                 key={item.id}
-                className="bg-white border rounded-2xl p-6 shadow-sm"
+                className="bg-white border rounded-2xl p-6 shadow-sm border-1 border-gray-400"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ">
                   {/* Avatar */}
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl">
                     👤

@@ -181,6 +181,57 @@ class TourController {
       return res.status(500).json({ message: err.message });
     }
   }
+  //update tour
+  static async updateTour(req, res) {
+    try {
+      const { id } = req.params;
+      const data = req.body;
+  
+      // parse JSON nếu gửi từ form-data
+      if (data.tourPrices && typeof data.tourPrices === "string") {
+        data.tourPrices = JSON.parse(data.tourPrices);
+      }
+  
+      if (data.tourSchedules && typeof data.tourSchedules === "string") {
+        data.tourSchedules = JSON.parse(data.tourSchedules);
+      }
+  
+      if (data.tourServices && typeof data.tourServices === "string") {
+        data.tourServices = JSON.parse(data.tourServices);
+      }
+  
+      // nếu có upload ảnh mới
+      if (req.files && req.files.length > 0) {
+        data.hinhAnh = req.files.map((file) => file.filename);
+      }
+  
+      const updatedTour = await TourService.updateTour(id, data);
+  
+      return res.status(200).json({
+        success: true,
+        message: "Cập nhật tour thành công",
+        data: updatedTour,
+      });
+    } catch (error) {
+      console.error(error);
+  
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          success: false,
+          message: "Dữ liệu không hợp lệ",
+          error: error.message,
+        });
+      }
+  
+      const statusCode = error.message === "Không tìm thấy tour" ? 404 : 500;
+  
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
 }
+
 
 export default TourController;
