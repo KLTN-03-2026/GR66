@@ -143,6 +143,8 @@ class TourService {
       console.log(err)
     }
   }
+
+  
   // tạo gói dịch vụ chung cho toàn hệ thống ( quản lí gói dịch vụ)
   static async createService(data) {
     if (!data.tendichvu || !data.tendichvu.trim()) {
@@ -179,7 +181,15 @@ class TourService {
     //Lấy giá tour
     const tourPrices = await TourPrice.find({ tourId });
     //Lấy dịch vụ
-    const tourServices = await TourServiceModel.find({ tourId });
+    const tourServices = await TourServiceModel.find({ tourId }).populate({
+      path: 'dichvuId',
+      model: 'Service',
+      populate: {
+        path: 'serviceTypeId',
+        model: 'serviceType'
+      }
+    });
+    console.log("tourServices:", JSON.stringify(tourServices, null, 2));
     // Trả về gộp tất cả
     return {
       tour,
