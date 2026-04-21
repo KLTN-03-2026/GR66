@@ -1,6 +1,4 @@
 "use client";
-
-import Image from "next/image";
 import { useState } from "react";
 import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
@@ -21,7 +19,9 @@ function BookingContent() {
 
   const [showFullLoTrinh, setShowFullLoTrinh] = useState(false);
   const [showFullDieuKhoan, setShowFullDieuKhoan] = useState(false);
-  const [showFullChitiettour, setShowFullChitiettour] = useState(false);  
+  const [showFullChitiettour, setShowFullChitiettour] = useState(false);
+  const [adultCount, setAdultCount] = useState(0);
+  const [childCount, setChildCount] = useState(0);
 
   // bật tắt thêm chi tiết thông tin
   const { expandedExtras, toggleExtraDetail } = useExtraDetail();
@@ -212,41 +212,33 @@ function BookingContent() {
 
 
                 {/* Dịch vụ thêm */}
-
-                {tourData.extra.map((services) => {
-                  const isSelected = selectedExtras.includes(services.id);
-                  const isExpanded = expandedExtras.includes(services.id);
-
+                {services.map((service) => {
+                  const isSelected = selectedExtras.includes(Number(service._id)); //Khác kiểu thì không so sánh được → phải ép cho cùng kiểu.
+                  const isExpanded = expandedExtras.includes(service._id);
+                  const isActive = isSelected; // khi nhấn xem thông tin chi tiết thì không hiện giá
                   return (
                     <div
-                      key={services.id}
+                      key={service._id}
                       className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
                     >
                       <h3 className="font-semibold text-gray-800 mb-3">
-                        {services.title}
+                        {service.tenDichVuApDung}
                       </h3>
 
-                      <p className="font-medium text-gray-700 mb-3">
-                        Loại dịch vụ: {services.type}
-                      </p>
+                      <div className="font-medium text-gray-700 mb-3">
+                        Loại dịch vụ:{" "}
+                        {(service.dichvuId as any)?.serviceTypeId?.loaidichvu}
+                      </div>
 
                       <div className="text-sm text-gray-600">
-                        <div
-                          className="overflow-hidden"
-                          style={
-                            !isExpanded
-                              ? {
-                                display: "-webkit-box",
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: "vertical",
-                              }
-                              : {}
-                          }
-                        >
-                          {services.included?.map((item, index) => (
-                            <p key={index}>• {item}</p>
-                          ))}
-                        </div>
+                        <div className=" text-sm text-gray-600">
+                            <p className="font-medium text-gray-800 mb-1">
+                              Dịch vụ bao gồm
+                            </p>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {service.noiDungDichVuBaoGom}
+                            </ul>
+                          </div>
                       </div>
 
                       {isExpanded && (
@@ -256,9 +248,7 @@ function BookingContent() {
                               Dịch vụ không bao gồm
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
-                              {services.notIncluded?.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
+                              {service.noiDungDichVuKhongBaoGom}
                             </ul>
                           </div>
 
@@ -267,37 +257,88 @@ function BookingContent() {
                               Điều khoản
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
-                              {services.terms?.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
+                              {service.dieuKhoan}
                             </ul>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
-                            <div className="bg-gray-50 rounded-xl px-4 py-3 border">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Giá dịch vụ đối với người lớn
-                              </p>
-                              <p className="font-semibold text-red-500">
-                                {services.adultPrice.toLocaleString()} đ
-                              </p>
-                            </div>
+                          {isActive && (
+                            <div className="mt-5 bg-white rounded-xl p-5 shadow-sm">
+                              <h2 className="font-semibold text-lg text-gray-800 mb-4">
+                                Chọn số lượng
+                              </h2>
+                              <div className="flex items-center justify-between py-3 border-b">
 
-                            <div className="bg-gray-50 rounded-xl px-4 py-3 border">
-                              <p className="text-sm text-gray-500 mb-1">
-                                Giá dịch vụ đối với trẻ em
-                              </p>
-                              <p className="font-semibold text-red-500">
-                                {services.childPrice.toLocaleString()} đ
-                              </p>
+                                {/* LEFT */}
+                                <div className="w-1/3">
+                                  <p className="text-gray-800">Người lớn</p>
+                                </div>
+
+                                {/* CENTER */}
+                                <div className="w-1/3 text-center">
+                                  <p className="text-blue-500 font-semibold">
+                                    đ {service.giaApDungNguoiLon}
+                                  </p>
+                                </div>
+
+                                {/* RIGHT */}
+                                <div className="w-1/3 flex justify-end items-center gap-2">
+                                  <button
+                                    onClick={() => setAdultCount(Math.max(0, adultCount - 1))}
+                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                                  >
+                                    -
+                                  </button>
+                                  <span className="w-6 text-center font-semibold text-gray-800">
+                                    {adultCount}
+                                  </span>
+                                  <button
+                                    onClick={() => setAdultCount(adultCount + 1)}
+                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Trẻ em */}
+                              <div className="flex items-center justify-between py-3">
+
+                                <div className="w-1/3">
+                                  <p className="text-gray-800">Trẻ em (100 - 139 cm)</p>
+                                </div>
+
+                                <div className="w-1/3 text-center">
+                                  <p className="text-blue-500 font-semibold">
+                                    đ {service.giaApDungTreEm}
+                                  </p>
+                                </div>
+
+                                <div className="w-1/3 flex justify-end items-center gap-2">
+                                  <button
+                                    onClick={() => setChildCount(Math.max(0, childCount - 1))}
+                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                                  >
+                                    -
+                                  </button>
+                                  <span className="w-6 text-center font-semibold text-gray-800">
+                                    {childCount}
+                                  </span>
+                                  <button
+                                    onClick={() => setChildCount(childCount + 1)}
+                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </>
                       )}
 
                       <div className="mt-[10px] flex justify-between items-center gap-4">
                         <button
-                          onClick={() => toggleExtraDetail(services.id)}
+                          onClick={() => toggleExtraDetail(service._id)}
                           className="text-sm italic underline text-gray-700 hover:text-black transition"
                         >
                           {isExpanded
@@ -308,31 +349,29 @@ function BookingContent() {
                         <div className="flex items-center gap-4 shrink-0">
                           {!isExpanded && (
                             <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
-                              đ {services.adultPrice.toLocaleString()}
+                              đ {service.giaApDungNguoiLon.toLocaleString()}
                             </p>
                           )}
 
                           <button
-                            onClick={() => toggleExtra(services.id)}
+                            onClick={() => toggleExtra(Number(service._id))}
                             className={`px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
                               ? "bg-green-600 hover:bg-green-700 text-white"
                               : "bg-blue-500 hover:bg-blue-600 text-white"
                               }`}
                           >
-                            {isSelected ? "Đã thêm ✓" : "Thêm"}
+                            {isSelected ? "Đã thêm ✓" : "Chọn"}
                           </button>
                         </div>
                       </div>
                     </div>
                   );
                 })}
-                
-              </div>
 
+
+              </div>
             </div>
             {/* ===== LEFT end ===================================================================================================================== */}
-
-
 
 
             {/* ===== RIGHT BOOKING ===== */}

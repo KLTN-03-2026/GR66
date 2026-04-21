@@ -7,9 +7,9 @@ import { TourRaw, ScheduleRaw, TourPriceRaw, TourServiceRaw } from "@/types/book
 
 
 export const useExtraDetail = () => {
-    const [expandedExtras, setExpandedExtras] = useState<number[]>([]);
+    const [expandedExtras, setExpandedExtras] = useState<string[]>([]);
     // bật tắt thêm chi tiết thông tin
-    const toggleExtraDetail = (id: number) => {
+    const toggleExtraDetail = (id: string) => {
         if (expandedExtras.includes(id)) {
             setExpandedExtras((prev) => prev.filter((item) => item !== id));
         } else {
@@ -106,12 +106,14 @@ export const useReview = () => {
 };
 
 
+
 interface TourDetail {
   tour: TourRaw;
   schedules: ScheduleRaw[];
   tourPrices: TourPriceRaw[];
   tourServices: TourServiceRaw[];
 }
+
 
 export const useTourDetail = () => {
   const searchParams = useSearchParams();

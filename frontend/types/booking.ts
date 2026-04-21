@@ -5,7 +5,7 @@ export interface ExtraService {
   type: string;
   adultPrice: number;
   childPrice: number;
-  included?: string[];
+  included: string[];
   notIncluded?: string[];
   terms?: string[];
 }
@@ -46,6 +46,7 @@ export interface TourPriceRaw {
 export interface TourServiceRaw {
   _id: string;
   tourId: string;
+  tendichvu: string;
   dichvuId: string;
   tenDichVuApDung: string;
   giaApDungNguoiLon: number;
@@ -53,6 +54,22 @@ export interface TourServiceRaw {
   noiDungDichVuBaoGom: string;
   noiDungDichVuKhongBaoGom: string;
   dieuKhoan: string;
+}
+
+export interface DichVuId {
+  _id: string;
+  tendichvu: string;
+  donVi: string;
+  moTa: string;
+  trangThai: string;
+  createdAt: string;
+  updatedAt: string;
+  serviceTypeId: {
+    _id: string;
+    loaidichvu: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export interface TourDetailResponse {
