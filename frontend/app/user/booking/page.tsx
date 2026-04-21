@@ -8,6 +8,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { vi } from "date-fns/locale";
 import { useEffect } from "react";
+import { FaCalendarAlt } from "react-icons/fa";
+
 import {
   useBooking,
   useExtraDetail,
@@ -57,12 +59,16 @@ function BookingContent() {
       new Date(item.ngaykhoihanh).toISOString().split("T")[0]
     ) || [];
 
+  const validDatesAsDate =
+    schedules?.map((item) => new Date(item.ngaykhoihanh)) || [];
   const firstScheduleDate =
     schedules && schedules.length > 0
       ? new Date(schedules[0].ngaykhoihanh)
         .toISOString()
         .split("T")[0]
       : "";
+
+
 
   //Test
   console.log("=== TOUR DETAIL ===");
@@ -424,46 +430,45 @@ function BookingContent() {
                 Tổng tiền: <span className="text-blue-600">{totalPrice.toLocaleString()} đ</span>
               </p>
 
-              <div className="mb-3">
-                <span className="text-lg block text-1xl text-gray-900 font-medium mb-1">
+              <div >
+                <span className="text-lg block text-1xl text-gray-900 font-medium mb-3 ">
                   Ngày khởi hành
                 </span>
-                <input
-                  type="date"
-                  value={checkInDate}
-                  min={validScheduleDates[0] || ""}
-                  max={validScheduleDates[validScheduleDates.length - 1] || ""}
-                  onChange={(e) => {
-                    const selectedDate = e.target.value;
+                <div className="relative">
+                  <DatePicker
+                    selected={checkInDate ? new Date(checkInDate) : null}
+                    onChange={(date: Date | null) => {
+                      if (!date) return;
 
-                    if (validScheduleDates.includes(selectedDate)) {
-                      handleCheckInChange(e);
-                    } else {
-                      alert("Bạn chỉ được chọn đúng ngày khởi hành có sẵn của tour");
-                    }
-                  }}
-                  className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-500"
-                />
-                {validScheduleDates.length > 0 && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    <p className="font-medium mb-1">Ngày khởi hành có sẵn:</p>
-                    <ul className="list-disc pl-5">
-                      {validScheduleDates.map((date, index) => (
-                        <li key={index}>
-                          {new Date(date).toLocaleDateString("vi-VN")}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                      const yyyy = date.getFullYear();
+                      const mm = String(date.getMonth() + 1).padStart(2, "0");
+                      const dd = String(date.getDate()).padStart(2, "0");
 
+                      const formatted = `${yyyy}-${mm}-${dd}`;
+
+                      handleCheckInChange({
+                        target: { value: formatted },
+                      } as React.ChangeEvent<HTMLInputElement>);
+                    }}
+                    locale={vi}
+                    dateFormat="dd/MM/yyyy"
+                    includeDates={validDatesAsDate}
+                    placeholderText="Chọn ngày khởi hành" // 👈 thêm khoảng trắng
+                    className="w-full border border-gray-300 rounded-lg pl-3 pt-3 pb-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-600 mr-40"
+                  />
+
+                  {/* icon */}
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 ">
+                    📅
+                  </span>
+                </div>
                 {checkInError && (
                   <p className="text-red-500 text-sm mt-2">{checkInError}</p>
                 )}
               </div>
 
               {/* Số người lớn */}
-              <div className="flex justify-between items-center mb-4 mt-6">
+              <div className="flex justify-between items-center mb-4 mt-5">
                 <span className="text-lg text-gray-800">Số người lớn</span>
                 <div className="flex items-center gap-2 text-gray-600 ">
                   <button onClick={() => setAdult(Math.max(1, adult - 1))} className="w-8 h-8 flex items-center justify-center text-xl border 
