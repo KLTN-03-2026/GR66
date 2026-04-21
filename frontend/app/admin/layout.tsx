@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/reviews", icon: Star, label: "Quản lý đánh giá" },
     { href: "/admin/promotions", icon: Gift, label: "Quản lý khuyến mãi" },
     { href: "/admin/services", icon: Package, label: "Quản lý gói dịch vụ" },
-    { href: "/admin/reportss", icon: BarChart3, label: "Báo cáo thống kê" },
+    { href: "/admin/reports", icon: BarChart3, label: "Báo cáo thống kê" },
   ];
 
   return (
