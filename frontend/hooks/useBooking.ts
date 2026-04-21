@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getTourById } from "@/services/bookingService";
@@ -85,8 +86,7 @@ export const useReview = () => {
     const [visibleReviews, setVisibleReviews] = useState(4);
     //Tổng số review
     const totalReviews = review.list.length;
-
-    //Tính điểm trung bình
+//Tính điểm trung bình
     const averageRating =
         totalReviews > 0
             ? review.list.reduce((sum, item) => sum + item.rating, 0) / totalReviews

@@ -1,7 +1,7 @@
-import { signUpService , logincServices , loginGoogle ,logoutService} from "../services/authService.js";
-import {REFRESH_TOKEN_TTL} from "../constants/Auth.js";
+import { signUpService, logincServices, loginGoogle, logoutService } from "../services/authService.js";
+import { REFRESH_TOKEN_TTL } from "../constants/Auth.js";
 
-export const signupController = async(req, res) => {
+export const signupController = async (req, res) => {
     try {
         const user = await signUpService(req.body)
         return res.status(201).json({
@@ -9,7 +9,7 @@ export const signupController = async(req, res) => {
             message: "Đăng kí thành công",
             user
         })
-    }catch(err){
+    } catch (err) {
         const status = err.status || 400;
         return res.status(status).json({
             success: false,
@@ -19,7 +19,7 @@ export const signupController = async(req, res) => {
 }
 
 export const loginController = async (req, res) => {
-    try{
+    try {
         const { accessToken, refreshToken, user } = await logincServices(req.body);
 
         res.cookie("refreshToken", refreshToken, {
@@ -41,7 +41,7 @@ export const loginController = async (req, res) => {
     }
 }
 export const loginWithGoogle = async (req, res) => {
-   try{
+    try {
         const { token } = req.body
         // Gọi hàm xử lý logic (đảm bảo hàm này trả về Object)
         const userData = await loginGoogle(token);
@@ -50,18 +50,20 @@ export const loginWithGoogle = async (req, res) => {
             success: true,
             user: userData
         });
-    }catch(err){
+    } catch (err) {
         console.error("Lỗi tại Backend:", err);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Internal Server Error" 
+        console.error(err.message);
+        console.error(err.stack)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
         });
     }
 }
 // Đăng xuất
 export const logoutController = async (req, res) => {
-     try {
-        const refreshToken  = req.cookies?.refreshToken;
+    try {
+        const refreshToken = req.cookies?.refreshToken;
         // gọi service để xóa session và cookie
         await logoutService(refreshToken);
         //xóa cookie
@@ -71,7 +73,7 @@ export const logoutController = async (req, res) => {
             message: "Đăng xuất thành công",
             user
         })
-    }catch(err){
+    } catch (err) {
         const status = err.status || 400;
         return res.status(status).json({
             success: false,

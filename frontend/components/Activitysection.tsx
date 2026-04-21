@@ -82,13 +82,12 @@ export default function ActivitySection() {
                   ? `http://localhost:3001/uploads/${item.hinhAnh[0]}`
                   : null;
 
-              console.log("Tên ảnh:", item.hinhAnh?.[0]);
-              console.log("URL ảnh:", imageUrl);
-
               return (
-                <div
+                <Link
                   key={item._id}
-                  className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 cursor-pointer"
+                  // ===== SỬA: truyền id bằng query string để khớp với useSearchParams() =====
+                  href={`/user/booking?tourId=${item._id}`}
+                  className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 cursor-pointer block"
                 >
                   <div className="relative h-56 overflow-hidden bg-gray-100">
                     {imageUrl ? (
@@ -129,7 +128,7 @@ export default function ActivitySection() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
