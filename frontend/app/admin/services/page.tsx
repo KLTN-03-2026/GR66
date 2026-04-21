@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Plus,
@@ -257,7 +257,10 @@ function formatMoney(value: number) {
 }
 
 function getServiceTypeName(serviceTypeId: string, serviceTypes: ServiceType[]) {
-  return serviceTypes.find((item) => item._id === serviceTypeId)?.loaidichvu || "Không rõ";
+  return (
+    serviceTypes.find((item) => item._id === serviceTypeId)?.loaidichvu ||
+    "Không rõ"
+  );
 }
 
 function getTourPriceByTourId(tourId: string, tourPrices: TourPrice[]) {
@@ -307,16 +310,21 @@ export default function AdminServicesPage() {
   });
 
   const [selectedTourId, setSelectedTourId] = useState<string>(
-    mockTours[0]?._id || ""
+    mockTours.find((tour) => tour.trangThai === "Hoạt động")?._id || ""
   );
   const [tourServiceSearch, setTourServiceSearch] = useState("");
-  const [selectedTourServiceId, setSelectedTourServiceId] = useState<string | null>(null);
+  const [selectedTourServiceId, setSelectedTourServiceId] = useState<string | null>(
+    null
+  );
 
   const filteredServices = useMemo(() => {
     const keyword = serviceSearch.trim().toLowerCase();
 
     return services.filter((service) => {
-      const serviceTypeName = getServiceTypeName(service.serviceTypeId, serviceTypes).toLowerCase();
+      const serviceTypeName = getServiceTypeName(
+        service.serviceTypeId,
+        serviceTypes
+      ).toLowerCase();
 
       const matchKeyword =
         service.tendichvu.toLowerCase().includes(keyword) ||
@@ -331,15 +339,36 @@ export default function AdminServicesPage() {
     });
   }, [services, serviceSearch, serviceTypeFilter, serviceTypes]);
 
+  const activeTours = useMemo(
+    () => tours.filter((tour) => tour.trangThai === "Hoạt động"),
+    [tours]
+  );
+
   const selectedTour = useMemo(
-    () => tours.find((tour) => tour._id === selectedTourId) || null,
-    [tours, selectedTourId]
+    () => activeTours.find((tour) => tour._id === selectedTourId) || null,
+    [activeTours, selectedTourId]
   );
 
   const selectedTourPrice = useMemo(
     () => getTourPriceByTourId(selectedTourId, tourPrices),
     [selectedTourId, tourPrices]
   );
+
+  useEffect(() => {
+    if (!activeTours.length) {
+      if (selectedTourId !== "") setSelectedTourId("");
+      return;
+    }
+
+    const isSelectedTourActive = activeTours.some(
+      (tour) => tour._id === selectedTourId
+    );
+
+    if (!isSelectedTourActive) {
+      setSelectedTourId(activeTours[0]._id);
+      setSelectedTourServiceId(null);
+    }
+  }, [activeTours, selectedTourId]);
 
   const filteredTourServices = useMemo(() => {
     const keyword = tourServiceSearch.trim().toLowerCase();
@@ -364,7 +393,8 @@ export default function AdminServicesPage() {
     return {
       totalServiceTypes: serviceTypes.length,
       totalServices: services.length,
-      activeServices: services.filter((item) => item.trangThai === "Hoạt động").length,
+      activeServices: services.filter((item) => item.trangThai === "Hoạt động")
+        .length,
       totalTourServices: tourServices.length,
     };
   }, [serviceTypes, services, tourServices]);
@@ -408,7 +438,11 @@ export default function AdminServicesPage() {
   };
 
   const saveService = () => {
-    if (!serviceForm.serviceTypeId || !serviceForm.tendichvu.trim() || !serviceForm.donVi.trim()) {
+    if (
+      !serviceForm.serviceTypeId ||
+      !serviceForm.tendichvu.trim() ||
+      !serviceForm.donVi.trim()
+    ) {
       window.alert("Vui lòng nhập đầy đủ loại dịch vụ, tên dịch vụ và đơn vị.");
       return;
     }
@@ -418,14 +452,14 @@ export default function AdminServicesPage() {
         prev.map((item) =>
           item._id === editingServiceId
             ? {
-                ...item,
-                serviceTypeId: serviceForm.serviceTypeId,
-                tendichvu: serviceForm.tendichvu.trim(),
-                moTa: serviceForm.moTa.trim(),
-                donVi: serviceForm.donVi.trim(),
-                trangThai: serviceForm.trangThai,
-                updatedAt: new Date().toISOString(),
-              }
+              ...item,
+              serviceTypeId: serviceForm.serviceTypeId,
+              tendichvu: serviceForm.tendichvu.trim(),
+              moTa: serviceForm.moTa.trim(),
+              donVi: serviceForm.donVi.trim(),
+              trangThai: serviceForm.trangThai,
+              updatedAt: new Date().toISOString(),
+            }
             : item
         )
       );
@@ -452,10 +486,10 @@ export default function AdminServicesPage() {
       prev.map((item) =>
         item._id === id
           ? {
-              ...item,
-              trangThai: item.trangThai === "Hoạt động" ? "Ngừng" : "Hoạt động",
-              updatedAt: new Date().toISOString(),
-            }
+            ...item,
+            trangThai: item.trangThai === "Hoạt động" ? "Ngừng" : "Hoạt động",
+            updatedAt: new Date().toISOString(),
+          }
           : item
       )
     );
@@ -478,7 +512,10 @@ export default function AdminServicesPage() {
   };
 
   const addServiceToTour = (service: Service) => {
-    if (!selectedTourId) return;
+    if (!selectedTourId) {
+      window.alert("Hiện không có tour đang hoạt động để gắn dịch vụ.");
+      return;
+    }
 
     const existed = tourServices.some(
       (item) => item.tourId === selectedTourId && item.dichvuId === service._id
@@ -505,10 +542,10 @@ export default function AdminServicesPage() {
       prev.map((item) =>
         item._id === id
           ? {
-              ...item,
-              [field]: value,
-              updatedAt: new Date().toISOString(),
-            }
+            ...item,
+            [field]: value,
+            updatedAt: new Date().toISOString(),
+          }
           : item
       )
     );
@@ -532,19 +569,26 @@ export default function AdminServicesPage() {
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard title="Loại dịch vụ" value={stats.totalServiceTypes} bg="bg-[#5D78EA]" />
           <StatCard title="Dịch vụ dùng chung" value={stats.totalServices} bg="bg-[#42C4A2]" />
-          <StatCard title="Dịch vụ đang hoạt động" value={stats.activeServices} bg="bg-[#7757E8]" />
-          <StatCard title="Tour services đã tạo" value={stats.totalTourServices} bg="bg-[#F08B55]" />
+          <StatCard
+            title="Dịch vụ đang hoạt động"
+            value={stats.activeServices}
+            bg="bg-[#7757E8]"
+          />
+          <StatCard
+            title="Tour services đã tạo"
+            value={stats.totalTourServices}
+            bg="bg-[#F08B55]"
+          />
         </div>
 
         <div className="mb-6 rounded-[18px] border border-[#E5E7EB] bg-white p-4">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <button
               onClick={() => setActiveTab("library")}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "library"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${activeTab === "library"
                   ? "bg-[#13A8E3] text-white"
                   : "bg-[#F3F4F6] text-[#374151]"
-              }`}
+                }`}
             >
               <Library className="h-4 w-4" />
               Thư viện dịch vụ
@@ -552,11 +596,10 @@ export default function AdminServicesPage() {
 
             <button
               onClick={() => setActiveTab("tour_services")}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "tour_services"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${activeTab === "tour_services"
                   ? "bg-[#13A8E3] text-white"
                   : "bg-[#F3F4F6] text-[#374151]"
-              }`}
+                }`}
             >
               <Settings2 className="h-4 w-4" />
               Thiết lập dịch vụ theo tour
@@ -632,10 +675,7 @@ export default function AdminServicesPage() {
                     <tbody>
                       {filteredServices.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan={6}
-                            className="py-10 text-center text-sm text-[#6B7280]"
-                          >
+                          <td colSpan={6} className="py-10 text-center text-sm text-[#6B7280]">
                             Không có dịch vụ phù hợp
                           </td>
                         </tr>
@@ -708,58 +748,62 @@ export default function AdminServicesPage() {
                 <div className="border-b border-[#EEF1F5] p-4">
                   <h3 className="text-[18px] font-semibold text-[#111827]">Danh sách tour</h3>
                   <p className="mt-1 text-sm text-[#6B7280]">
-                    Danh sách này lấy từ các tour đã tạo trong màn Quản lý tour. Chọn tour để cấu hình dịch vụ riêng cho tour đó.
+                    Danh sách này lấy từ các tour đã tạo trong màn Quản lý tour. Chỉ hiển thị
+                    những tour đang hoạt động để cấu hình dịch vụ riêng.
                   </p>
                 </div>
 
                 <div className="max-h-[760px] overflow-y-auto p-4">
                   <div className="space-y-3">
-                    {tours.map((tour) => {
-                      const price = getTourPriceByTourId(tour._id, tourPrices);
-                      const totalServicesOfTour = tourServices.filter(
-                        (item) => item.tourId === tour._id
-                      ).length;
+                    {activeTours.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-[#D1D5DB] p-6 text-sm text-[#6B7280]">
+                        Hiện chưa có tour nào đang hoạt động để cấu hình dịch vụ.
+                      </div>
+                    ) : (
+                      activeTours.map((tour) => {
+                        const price = getTourPriceByTourId(tour._id, tourPrices);
+                        const totalServicesOfTour = tourServices.filter(
+                          (item) => item.tourId === tour._id
+                        ).length;
 
-                      return (
-                        <button
-                          key={tour._id}
-                          onClick={() => {
-                            setSelectedTourId(tour._id);
-                            setSelectedTourServiceId(null);
-                          }}
-                          className={`w-full rounded-2xl border p-4 text-left transition ${
-                            selectedTourId === tour._id
-                              ? "border-[#13A8E3] bg-[#F0FAFF]"
-                              : "border-[#E5E7EB] bg-white"
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="text-[15px] font-semibold text-[#111827]">
-                                {tour.tenTour}
+                        return (
+                          <button
+                            key={tour._id}
+                            onClick={() => {
+                              setSelectedTourId(tour._id);
+                              setSelectedTourServiceId(null);
+                            }}
+                            className={`w-full rounded-2xl border p-4 text-left transition ${selectedTourId === tour._id
+                                ? "border-[#13A8E3] bg-[#F0FAFF]"
+                                : "border-[#E5E7EB] bg-white"
+                              }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-[15px] font-semibold text-[#111827]">
+                                  {tour.tenTour}
+                                </div>
+                                <div className="mt-1 text-xs text-[#6B7280]">{tour.maTour}</div>
+                                <div className="mt-1 text-xs text-[#6B7280]">
+                                  Địa điểm: {tour.diaDiem}
+                                </div>
                               </div>
-                              <div className="mt-1 text-xs text-[#6B7280]">
-                                {tour.maTour}
-                              </div>
-                              <div className="mt-1 text-xs text-[#6B7280]">
-                                Địa điểm: {tour.diaDiem}
-                              </div>
+                              <StatusBadge status={tour.trangThai} />
                             </div>
-                            <StatusBadge status={tour.trangThai} />
-                          </div>
 
-                          <div className="mt-3 text-xs text-[#4B5563]">
-                            Giá gốc NL: {formatMoney(price?.giaNguoiLon || 0)} đ
-                          </div>
-                          <div className="mt-1 text-xs text-[#4B5563]">
-                            Giá gốc TE: {formatMoney(price?.giaTreEm || 0)} đ
-                          </div>
-                          <div className="mt-1 text-xs text-[#4B5563]">
-                            Đã set {totalServicesOfTour} dịch vụ riêng cho tour này
-                          </div>
-                        </button>
-                      );
-                    })}
+                            <div className="mt-3 text-xs text-[#4B5563]">
+                              Giá gốc NL: {formatMoney(price?.giaNguoiLon || 0)} đ
+                            </div>
+                            <div className="mt-1 text-xs text-[#4B5563]">
+                              Giá gốc TE: {formatMoney(price?.giaTreEm || 0)} đ
+                            </div>
+                            <div className="mt-1 text-xs text-[#4B5563]">
+                              Đã set {totalServicesOfTour} dịch vụ riêng cho tour này
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -771,7 +815,8 @@ export default function AdminServicesPage() {
                       Thiết lập dịch vụ theo tour
                     </h3>
                     <p className="mt-1 text-sm text-[#6B7280]">
-                      Dịch vụ ở đây được lấy từ dịch vụ dùng chung, sau đó chỉnh lại tên áp dụng, giá áp dụng và nội dung riêng cho từng tour.
+                      Dịch vụ ở đây được lấy từ dịch vụ dùng chung, sau đó chỉnh lại tên áp dụng,
+                      giá áp dụng và nội dung riêng cho từng tour.
                     </p>
                   </div>
 
@@ -786,12 +831,8 @@ export default function AdminServicesPage() {
                       <div>
                         Giá gốc tour trẻ em: {formatMoney(selectedTourPrice?.giaTreEm || 0)} đ
                       </div>
-                      <div>
-                        Tổng giá dịch vụ NL: {formatMoney(totalConfiguredAdult)} đ
-                      </div>
-                      <div>
-                        Tổng giá dịch vụ TE: {formatMoney(totalConfiguredChild)} đ
-                      </div>
+                      <div>Tổng giá dịch vụ NL: {formatMoney(totalConfiguredAdult)} đ</div>
+                      <div>Tổng giá dịch vụ TE: {formatMoney(totalConfiguredChild)} đ</div>
                     </div>
                   </div>
 
@@ -810,10 +851,14 @@ export default function AdminServicesPage() {
                 </div>
 
                 <div className="max-h-[760px] overflow-y-auto p-4">
-                  {filteredTourServices.length === 0 ? (
+                  {!selectedTourId ? (
                     <div className="rounded-2xl border border-dashed border-[#D1D5DB] p-10 text-center text-sm text-[#6B7280]">
-                      Tour này chưa có dịch vụ riêng. Hãy quay về tab <b>Thư viện dịch vụ</b> và bấm
-                      <b> Gắn vào tour</b>.
+                      Không có tour đang hoạt động để hiển thị dịch vụ.
+                    </div>
+                  ) : filteredTourServices.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[#D1D5DB] p-10 text-center text-sm text-[#6B7280]">
+                      Tour này chưa có dịch vụ riêng. Hãy quay về tab <b>Thư viện dịch vụ</b> và
+                      bấm <b>Gắn vào tour</b>.
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -823,11 +868,10 @@ export default function AdminServicesPage() {
                         return (
                           <div
                             key={item._id}
-                            className={`rounded-2xl border p-4 transition ${
-                              selectedTourServiceId === item._id
+                            className={`rounded-2xl border p-4 transition ${selectedTourServiceId === item._id
                                 ? "border-[#13A8E3] bg-[#F0FAFF]"
                                 : "border-[#E5E7EB] bg-[#FCFCFD]"
-                            }`}
+                              }`}
                           >
                             <div className="mb-4 flex items-start justify-between gap-3">
                               <div>
@@ -869,26 +913,41 @@ export default function AdminServicesPage() {
 
                               <div className="grid grid-cols-2 gap-3">
                                 <Input
-                                  value={String(item.giaApDungNguoiLon)}
-                                  onChange={(e) =>
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={
+                                    item.giaApDungNguoiLon === 0
+                                      ? ""
+                                      : String(item.giaApDungNguoiLon)
+                                  }
+                                  onChange={(e) => {
+                                    const rawValue = e.target.value.replace(/\D/g, "");
                                     updateTourService(
                                       item._id,
                                       "giaApDungNguoiLon",
-                                      Number(e.target.value) || 0
-                                    )
-                                  }
-                                  placeholder="Giá áp dụng người lớn"
+                                      rawValue === "" ? 0 : Number(rawValue)
+                                    );
+                                  }}
+                                  placeholder="Giá người lớn"
                                 />
+
                                 <Input
-                                  value={String(item.giaApDungTreEm)}
-                                  onChange={(e) =>
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={
+                                    item.giaApDungTreEm === 0
+                                      ? ""
+                                      : String(item.giaApDungTreEm)
+                                  }
+                                  onChange={(e) => {
+                                    const rawValue = e.target.value.replace(/\D/g, "");
                                     updateTourService(
                                       item._id,
                                       "giaApDungTreEm",
-                                      Number(e.target.value) || 0
-                                    )
-                                  }
-                                  placeholder="Giá áp dụng trẻ em"
+                                      rawValue === "" ? 0 : Number(rawValue)
+                                    );
+                                  }}
+                                  placeholder="Giá trẻ em"
                                 />
                               </div>
                             </div>
@@ -1013,9 +1072,7 @@ export default function AdminServicesPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-black">
-                  Mô tả
-                </label>
+                <label className="mb-2 block text-sm font-semibold text-black">Mô tả</label>
                 <textarea
                   value={serviceForm.moTa}
                   onChange={(e) =>
