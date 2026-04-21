@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 
-router.get("/", TourController.getAllTours);
+router.get("/", TourController.getAllTours); 
 // tạo tour
 router.post('/create/tours',upload.array('hinhAnh'), TourController.createTour) // upload lấy từ mdw upload_img.js | upload.array thêm nhiều ảnh nếu muốn thêm 11 ảnh sử dụng single
 // tạo loại dịch vụ

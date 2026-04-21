@@ -19,8 +19,9 @@ import { useParams } from "next/navigation";
 /* ============ MAIN CONTENT ============ */
 function BookingContent() {
 
-  const [showFullTerms, setShowFullTerms] = useState(false);
-  const [showFullItinerary, setShowFullItinerary] = useState(false);
+  const [showFullLoTrinh, setShowFullLoTrinh] = useState(false);
+  const [showFullDieuKhoan, setShowFullDieuKhoan] = useState(false);
+  const [showFullChitiettour, setShowFullChitiettour] = useState(false);  
 
   // bật tắt thêm chi tiết thông tin
   const { expandedExtras, toggleExtraDetail } = useExtraDetail();
@@ -125,23 +126,26 @@ function BookingContent() {
 
               {/* ITINERARY */}
               <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h2 className="font-semibold text-lg text-gray-800 mb-2">
+                <h2 className="font-semibold text-lg text-gray-800 mb-3">
                   Lộ trình
                 </h2>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {(() => {
+                    const maxLength = 300;
+                    const text = tour.loTrinh || "";
+                    const isLongText = text.length > maxLength;
+                    return showFullLoTrinh ? text : text.slice(0, maxLength) + (isLongText ? "..." : "");
+                  })()}
+                </p>
 
-                <ul className="text-sm text-gray-600 space-y-1 overflow-hidden">
-                  {tour.loTrinh}
-                </ul>
-
-                {tourData.itinerary.length > 5 && (
+                {tour.loTrinh?.length > 300 && (
                   <div className="flex justify-end mt-4">
-                    <button
-                      onClick={() => setShowFullItinerary(!showFullItinerary)}
-                      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-3xl text-sm 
-                    font-medium flex items-center gap-2 transition-all active:scale-95"
+                    <span
+                      onClick={() => setShowFullLoTrinh(!showFullLoTrinh)}
+                      className="text-blue-600 underline cursor-pointer text-sm font-medium"
                     >
-                      <span>{showFullItinerary ? "Thu gọn ↑" : "Xem thêm →"}</span>
-                    </button>
+                      {showFullLoTrinh ? "Thu gọn ↑" : "Xem thêm →"}
+                    </span>
                   </div>
                 )}
               </div>
@@ -149,14 +153,63 @@ function BookingContent() {
               <div className="space-y-6">
 
                 {/* INCLUDED SERVICES */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                  <h3 className="font-semibold text-gray-800 mb-3">
+                <div className="bg-white rounded-xl p-5 shadow-sm">
+                  <h2 className="font-semibold text-lg text-gray-800 mb-3">
                     Chi tiết tour bao gồm
-                  </h3>
-                  <ul className="text-sm text-gray-600 space-y-1 list-disc pl-5">
-                    {tour.chitiettour}
-                  </ul>
+                  </h2>
+
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {(() => {
+                      const maxLength = 500;
+                      const text = tour?.chitiettour || "";
+                      const isLongText = text.length > maxLength;
+
+                      return showFullChitiettour
+                        ? text
+                        : text.slice(0, maxLength) + (isLongText ? "..." : "");
+                    })()}
+                  </p>
+
+                  {tour?.chitiettour?.length > 300 && (
+                    <div className="flex justify-end mt-4">
+                      <span
+                        onClick={() => setShowFullChitiettour(!showFullChitiettour)}
+                        className="text-blue-600 underline cursor-pointer text-sm font-medium"
+                      >
+                        {showFullChitiettour ? "Thu gọn ↑" : "Xem thêm →"}
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {/*============= ĐIỀU KHOẢN ===========================================*/}
+                <div className="bg-white rounded-xl p-5 shadow-sm">
+                  <h2 className="font-semibold text-lg text-gray-800 mb-3">
+                    Điều khoản sử dụng
+                  </h2>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {(() => {
+                      const maxLength = 300;
+                      const text = tour.dieuKhoan || "";
+                      const isLongText = text.length > maxLength;
+                      return showFullDieuKhoan
+                        ? text
+                        : text.slice(0, maxLength) + (isLongText ? "..." : "");
+                    })()}
+                  </p>
+
+                  {tour.dieuKhoan?.length > 300 && (
+                    <div className="flex justify-end mt-4">
+                      <span
+                        onClick={() => setShowFullDieuKhoan(!showFullDieuKhoan)}
+                        className="text-blue-600 underline cursor-pointer text-sm font-medium"
+                      >
+                        {showFullDieuKhoan ? "Thu gọn ↑" : "Xem thêm →"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
 
                 {/* Dịch vụ thêm */}
 
@@ -275,36 +328,6 @@ function BookingContent() {
                 })}
                 
               </div>
-
-
-              {/*============= ĐIỀU KHOẢN ===========================================*/}
-              <div className="bg-white rounded-xl p-5 shadow-sm">
-                <h2 className="font-semibold text-lg text-gray-800 mb-3">
-                  Điều khoản sử dụng
-                </h2>
-
-                <div className="text-sm text-gray-600 space-y-3">
-                  <div>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {tour.dieuKhoan}
-                    </ul>
-                  </div>
-                </div>
-
-                {tourData.terms.length > 4 && (
-                  <div className="flex justify-end mt-4">
-                    <button
-                      onClick={() => setShowFullTerms(!showFullTerms)}
-                      className="px-6 py-2.5 bg-blue-500 hover:bg-blue-700 text-white rounded-2xl text-sm font-medium flex items-center gap-2 transition-all active:scale-95"
-                    >
-                      <span>{showFullTerms ? "Thu gọn ↑" : "Xem thêm →"}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-
-
 
             </div>
             {/* ===== LEFT end ===================================================================================================================== */}
