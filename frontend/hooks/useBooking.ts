@@ -23,6 +23,7 @@ export const useExtraDetail = () => {
     };
 };
 
+
 export const useBooking = () => {
     const [checkInDate, setCheckInDate] = useState(""); // lưu ngày người dùng . ban đầu để rỗng
     const [checkInError, setCheckInError] = useState(""); // thông báo lỗi, ban đầu để rỗng
@@ -48,10 +49,10 @@ export const useBooking = () => {
 };
 
 export const useSelectedExtras  = () => {
-    const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
+    const [selectedExtras, setSelectedExtras] = useState<String[]>([]);
 
     // chọn bỏ dịch vụ thêm , chọn nhiều option trong form, xử lý checkbox list
-    const toggleExtra = (id: number) => {
+    const toggleExtra = (id: string) => {
         if (selectedExtras.includes(id)) {
             setSelectedExtras((prev) => prev.filter((item) => item !== id));
         } else {
@@ -140,11 +141,9 @@ export const useTourDetail = () => {
 
     fetch();
   }, [tourId]);
-
   const tour        = data?.tour ?? null;  // Lấy tour từ data, nếu không có thì trả về null
   const schedules   = data?.schedules ?? [];
   const price       = data?.tourPrices?.[0] ?? null;   // lấy giá đầu tiên
   const services    = data?.tourServices ?? [];
-
   return { tour, schedules, price, services, loading, error, tourId };
 };

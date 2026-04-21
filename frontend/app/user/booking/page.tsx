@@ -24,11 +24,8 @@ function BookingContent() {
   const [showFullLoTrinh, setShowFullLoTrinh] = useState(false);
   const [showFullDieuKhoan, setShowFullDieuKhoan] = useState(false);
   const [showFullChitiettour, setShowFullChitiettour] = useState(false);
-<<<<<<< HEAD
   const [adultCount, setAdultCount] = useState(0);
   const [childCount, setChildCount] = useState(0);
-=======
->>>>>>> origin/devquan
 
   // bật tắt thêm chi tiết thông tin
   const { expandedExtras, toggleExtraDetail } = useExtraDetail();
@@ -79,6 +76,19 @@ function BookingContent() {
   if (loading) return <p className="p-8">Đang tải...</p>;
   if (error) return <p className="p-8 text-red-500">Lỗi: {error}</p>;
   if (!tour) return <p className="p-8">Không tìm thấy tour</p>;
+
+
+  // lần 1 là bung trang lần 2 là đặt divhj vụ
+  //   if (!isSelected) {
+  //     // Lần 1 → chỉ chọn
+  //     setSelectedExtras([...selectedExtras, id]);
+  //   } else {
+  //     // Lần 2 → thực hiện hành động (đặt tour)
+  //     handleBooking(id); // hàm bạn tự viết
+  //   }
+  // };
+
+
 
   return (
     <div className="bg-gray-50 min-h-screen pb-30">
@@ -241,18 +251,13 @@ function BookingContent() {
 
                 {/* Dịch vụ thêm */}
                 {services.map((service) => {
-                  const isSelected = selectedExtras.includes(Number(service._id)); //Khác kiểu thì không so sánh được → phải ép cho cùng kiểu.
+                  const isSelected = selectedExtras.includes(service._id);// nếu true thì render phần chi tiết.
                   const isExpanded = expandedExtras.includes(service._id);
-                  const isActive = isSelected; // khi nhấn xem thông tin chi tiết thì không hiện giá
                   return (
                     <div
                       key={service._id}
                       className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
                     >
-                      <h3 className="font-semibold text-gray-800 mb-3">
-                        {service.tenDichVuApDung}
-                      </h3>
-
                       <div className="font-medium text-gray-700 mb-3">
                         Loại dịch vụ:{" "}
                         {(service.dichvuId as any)?.serviceTypeId?.loaidichvu}
@@ -260,13 +265,13 @@ function BookingContent() {
 
                       <div className="text-sm text-gray-600">
                         <div className=" text-sm text-gray-600">
-                            <p className="font-medium text-gray-800 mb-1">
-                              Dịch vụ bao gồm
-                            </p>
-                            <ul className="list-disc pl-5 space-y-1">
-                              {service.noiDungDichVuBaoGom}
-                            </ul>
-                          </div>
+                          <p className="font-medium text-gray-800 mb-1">
+                            Dịch vụ bao gồm
+                          </p>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {service.noiDungDichVuBaoGom}
+                          </ul>
+                        </div>
                       </div>
 
                       {isExpanded && (
@@ -288,110 +293,120 @@ function BookingContent() {
                               {service.dieuKhoan}
                             </ul>
                           </div>
-
-                          {isActive && (
-                            <div className="mt-5 bg-white rounded-xl p-5 shadow-sm">
-                              <h2 className="font-semibold text-lg text-gray-800 mb-4">
-                                Chọn số lượng
-                              </h2>
-                              <div className="flex items-center justify-between py-3 border-b">
-
-                                {/* LEFT */}
-                                <div className="w-1/3">
-                                  <p className="text-gray-800">Người lớn</p>
-                                </div>
-
-                                {/* CENTER */}
-                                <div className="w-1/3 text-center">
-                                  <p className="text-blue-500 font-semibold">
-                                    đ {service.giaApDungNguoiLon}
-                                  </p>
-                                </div>
-
-                                {/* RIGHT */}
-                                <div className="w-1/3 flex justify-end items-center gap-2">
-                                  <button
-                                    onClick={() => setAdultCount(Math.max(0, adultCount - 1))}
-                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
-                                  >
-                                    -
-                                  </button>
-                                  <span className="w-6 text-center font-semibold text-gray-800">
-                                    {adultCount}
-                                  </span>
-                                  <button
-                                    onClick={() => setAdultCount(adultCount + 1)}
-                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              </div>
-
-                              {/* Trẻ em */}
-                              <div className="flex items-center justify-between py-3">
-
-                                <div className="w-1/3">
-                                  <p className="text-gray-800">Trẻ em (100 - 139 cm)</p>
-                                </div>
-
-                                <div className="w-1/3 text-center">
-                                  <p className="text-blue-500 font-semibold">
-                                    đ {service.giaApDungTreEm}
-                                  </p>
-                                </div>
-
-                                <div className="w-1/3 flex justify-end items-center gap-2">
-                                  <button
-                                    onClick={() => setChildCount(Math.max(0, childCount - 1))}
-                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
-                                  >
-                                    -
-                                  </button>
-                                  <span className="w-6 text-center font-semibold text-gray-800">
-                                    {childCount}
-                                  </span>
-                                  <button
-                                    onClick={() => setChildCount(childCount + 1)}
-                                    className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                         </>
                       )}
-
                       <div className="mt-[10px] flex justify-between items-center gap-4">
                         <button
                           onClick={() => toggleExtraDetail(service._id)}
-                          className="text-sm italic underline text-gray-700 hover:text-black transition"
+                          className="text-sm italic underline text-gray-700 hover:text-black transition ml-5"
                         >
                           {isExpanded
                             ? "Thu gọn thông tin dịch vụ"
                             : "Xem thông tin chi tiết của dịch vụ"}
                         </button>
-
-                        <div className="flex items-center gap-4 shrink-0">
-                          {!isExpanded && (
-                            <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
-                              đ {service.giaApDungNguoiLon.toLocaleString()}
-                            </p>
-                          )}
-
-                          <button
-                            onClick={() => toggleExtra(Number(service._id))}
-                            className={`px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap ${isSelected
-                              ? "bg-green-600 hover:bg-green-700 text-white"
-                              : "bg-blue-500 hover:bg-blue-600 text-white"
-                              }`}
-                          >
-                            {isSelected ? "Đã thêm ✓" : "Chọn"}
-                          </button>
-                        </div>
                       </div>
+
+
+                      {/*chọn số lượng người lớn và trẻ em */}
+                      {isSelected && (
+                        <div className="mt-5 bg-white rounded-xl p-5 shadow-sm">
+                          <h2 className="font-semibold text-lg text-gray-800 mb-4">
+                            Chọn số lượng
+                          </h2>
+                          <div className="flex items-center justify-between py-3 border-b">
+
+                            {/* LEFT */}
+                            <div className="w-1/3">
+                              <p className="text-gray-800">Người lớn</p>
+                            </div>
+
+                            {/* CENTER */}
+                            <div className="w-1/3 text-center">
+                              <p className="text-blue-500 font-semibold">
+                                đ {service.giaApDungNguoiLon}
+                              </p>
+                            </div>
+
+                            {/* RIGHT */}
+                            <div className="w-1/3 flex justify-end items-center gap-2">
+                              <button
+                                onClick={() => setAdultCount(Math.max(0, adultCount - 1))}
+                                className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                              >
+                                -
+                              </button>
+                              <span className="w-6 text-center font-semibold text-gray-800">
+                                {adultCount}
+                              </span>
+                              <button
+                                onClick={() => setAdultCount(adultCount + 1)}
+                                className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Trẻ em */}
+                          <div className="flex items-center justify-between py-3">
+
+                            <div className="w-1/3">
+                              <p className="text-gray-800">Trẻ em (100 - 139 cm)</p>
+                            </div>
+
+                            <div className="w-1/3 text-center">
+                              <p className="text-blue-500 font-semibold">
+                                đ {service.giaApDungTreEm}
+                              </p>
+                            </div>
+
+                            <div className="w-1/3 flex justify-end items-center gap-2">
+                              <button
+                                onClick={() => setChildCount(Math.max(0, childCount - 1))}
+                                className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                              >
+                                -
+                              </button>
+                              <span className="w-6 text-center font-semibold text-gray-800">
+                                {childCount}
+                              </span>
+                              <button
+                                onClick={() => setChildCount(childCount + 1)}
+                                className="w-8 h-8 rounded-full bg-white-400 text-black flex items-center justify-center border border-gray-400 "
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/*nút chọn và giá */}
+                      <div className="flex items-center gap-4 shrink-0 ml-auto">
+  {!isExpanded && (
+    <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
+      đ {service.giaApDungNguoiLon.toLocaleString()}
+    </p>
+  )}
+
+  <button
+    onClick={() => {
+        toggleExtra(service._id); // "Chọn" → hiện form
+    }}
+    className="px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white"
+  >
+    {isSelected ? "Đặt ngay" : "Chọn"}
+  </button>
+
+  {isSelected && (
+    <button
+      onClick={() => toggleExtra(service._id)} // "Hủy" → ẩn form
+      className="px-4 py-2.5 text-sm font-medium rounded-full border border-gray-300 hover:bg-gray-100 text-gray-600"
+    >
+      ✕ Hủy
+    </button>
+  )}
+</div>
                     </div>
                   );
                 })}
