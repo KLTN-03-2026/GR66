@@ -1,6 +1,6 @@
 
 export interface ExtraService {
-  id: string | number;
+  id: string;
   title: string;
   type: string;
   adultPrice: number;
@@ -36,6 +36,7 @@ export interface ScheduleRaw {
   Socho: number;
   Conlai: number;
 }
+
 export interface TourPriceRaw {
   _id: string;
   tourId: string;
@@ -72,6 +73,15 @@ export interface DichVuId {
   };
 }
 
+export interface Review {
+  _id: string;
+  Users_ID: string;
+  Tour_Id: string;
+  Noidung: string;
+  Sosao: number;
+}
+
+//định nghĩa cấu trúc dữ liệu API trả về cho TypeScript.
 export interface TourDetailResponse {
   success: boolean;
   data: {
@@ -79,5 +89,7 @@ export interface TourDetailResponse {
     schedules: ScheduleRaw[];
     tourPrices: TourPriceRaw[];
     tourServices: TourServiceRaw[];
+    reviews: Review[];
   };
 }
+

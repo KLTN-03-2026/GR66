@@ -4,16 +4,21 @@ import Tour from "../models/Tour.js";
 
 class ReviewService {
   static async createReview(userId, data) {
-    const { Tour_ID, Noidung, Sosao } = data;
+    if (!data) {
+      const err = new Error("Request body bị thiếu");
+      err.status = 400;
+      throw err;
+    }
+    const { Tour_Id, Noidung, Sosao } = data;
 
-    if (!Tour_ID || !Sosao) {
+    if (!Tour_Id || !Sosao) {
       const err = new Error("Thiếu dữ liệu đánh giá");
       err.status = 400;
       throw err;
     }
 
-    if (!mongoose.Types.ObjectId.isValid(Tour_ID)) {
-      const err = new Error("Tour_ID không hợp lệ");
+    if (!mongoose.Types.ObjectId.isValid(Tour_Id)) {
+      const err = new Error("Tour_Id không hợp lệ");
       err.status = 400;
       throw err;
     }
@@ -24,7 +29,7 @@ class ReviewService {
       throw err;
     }
 
-    const tour = await Tour.findById(Tour_ID);
+    const tour = await Tour.findById(Tour_Id);
     if (!tour) {
       const err = new Error("Tour không tồn tại");
       err.status = 404;
@@ -32,14 +37,21 @@ class ReviewService {
     }
 
     const newReview = await Review.create({
-      Users_ID: userId,
-      Tour_ID,
+      Users_ID: data.Users_ID,  // Nhập Id từ client
+      Tour_Id,
       Noidung,
       Sosao,
       Ngaydanhgia: new Date(),
     });
 
-    return newReview;
+
+    const review = await Review.findById(newReview._id)
+      .populate({
+        path: "Users_ID",
+        select: "hoten email"
+      });
+    console.log("AFTER POPULATE:", review);
+    return review;
   }
 }
 

@@ -5,9 +5,9 @@ import TourServiceModel from "../models/tourService.js"; //Rename để tránh t
 import mongoose from "mongoose";
 import TourPrice from "../models/TourPrice.js";
 import serviceType from "../models/serviceType.js";
+import Review from "../models/review.js";
 
 class TourService {
-
   //TẠO TOUR
   static async createTour(data) {
     if (!data.tenTour) {
@@ -52,7 +52,6 @@ class TourService {
       } else {
         schedules = [];  // nếu không có lịch thì trả lại mảng rỗng
       }
-
 
       // tạo giá tour
       let tourPrices = null;
@@ -143,7 +142,6 @@ class TourService {
       console.log(err)
     }
   }
-
   
   // tạo gói dịch vụ chung cho toàn hệ thống ( quản lí gói dịch vụ)
   static async createService(data) {
@@ -172,6 +170,7 @@ class TourService {
   static async getTourDetail(id) {
     //Lấy tour chính
     const tour = await Tour.findById(id);
+    console.log("id nhận được:", id);
     if (!tour) {
       throw new Error("Không tìm thấy tour");
     }
@@ -189,15 +188,22 @@ class TourService {
         model: 'serviceType'
       }
     });
-    console.log("tourServices:", JSON.stringify(tourServices, null, 2));
+    // Lấy bảng đánh giá của tour
+    const reviews = await Review.find({ Tour_Id: tourId }) .populate({
+        path: "Users_ID",
+        select: "hoten email"
+      });
+    console.log("Reviews:", reviews);
     // Trả về gộp tất cả
     return {
       tour,
       schedules,
       tourPrices,
       tourServices,
+      reviews
     };
   }
+
   // Hiển thị danh sách tour ngoài giao diện
   static async getAllTours() {
     const tours = await Tour.find({ trangThai: "Hoạt động" }).sort({ createdAt: -1 });
@@ -221,7 +227,6 @@ class TourService {
         };
       })
     );
-
     return result;
   }
 
@@ -229,14 +234,12 @@ class TourService {
   static async updateTour(id, data) {
     const session = await mongoose.startSession();
     session.startTransaction();
-  
     try {
       const tour = await Tour.findById(id).session(session);
   
       if (!tour) {
         throw new Error("Không tìm thấy tour");
       }
-  
       // cập nhật bảng Tour
       tour.tenTour = data.tenTour ?? tour.tenTour;
       tour.diaDiem = data.diaDiem ?? tour.diaDiem;
@@ -294,31 +297,25 @@ class TourService {
           );
         }
       }
-  
       // cập nhật dịch vụ của tour
       if (data.tourServices && Array.isArray(data.tourServices)) {
         await TourServiceModel.deleteMany({ tourId: id }, { session });
   
         if (data.tourServices.length > 0) {
           const dichvuIds = data.tourServices.map((item) => item.dichvuId);
-  
           const dichvuList = await Service.find({
             _id: { $in: dichvuIds },
           }).session(session);
-  
           const dichvuMap = {};
           for (let i = 0; i < dichvuList.length; i++) {
             const dichvu = dichvuList[i];
             dichvuMap[dichvu._id.toString()] = dichvu;
           }
-  
           const newTourServices = data.tourServices.map((item) => {
             const dichvu = dichvuMap[item.dichvuId.toString()];
-  
             if (!dichvu) {
               throw new Error(`Không tìm thấy dịch vụ: ${item.dichvuId}`);
             }
-  
             return {
               tourId: id,
               dichvuId: item.dichvuId,
@@ -332,14 +329,11 @@ class TourService {
               dieuKhoan: item.dieuKhoan || dichvu.dieuKhoan,
             };
           });
-  
           await TourServiceModel.insertMany(newTourServices, { session });
         }
       }
-  
       await session.commitTransaction();
       session.endSession();
-  
       return await this.getTourDetail(id);
     } catch (error) {
       await session.abortTransaction();

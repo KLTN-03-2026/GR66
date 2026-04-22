@@ -24,8 +24,8 @@ app.use(express.json()); // cho phép server đọc Json
 
 //public routes
 app.use('/api/auth', authRoute);
-app.use('/api/tours', tourRoute);
-app.use( "/uploads", express.static(path.join(__dirname, "uploads")) );
+app.use('/api/tours', tourRoute);  // api cho tour  
+app.use( "/uploads", express.static(path.join(__dirname, "uploads")) ); // api cho hình ảnh tour
 //private routes
 app.use('/api/users',ProtetedRoute ,userRoute);
 app.use("/api/manageuser", manageuserRoute);

@@ -42,18 +42,20 @@ function BookingContent() {
   const { adult, setAdult, child, setChild, baseAdultCount } = useAdultCount();
 
   // tính tổng tiền các dịch vụ thêm mà người dùng đã chọn
-  let extraTotal = 0; // tạo biến để cộng dồn tiền dịch vụ thêm
-  tourData.extra.forEach((service) => {
-    if (selectedExtras.includes(service.id)) { // kiểm tra xem dịch vụ này có được user chọn không
-      extraTotal += service.adultPrice * adult + service.childPrice * child;
-    }
-  });
+  let extraTotal = 0;
+
+
   //tính tổng tiền tour cuối cùng cho người dùng
   const totalPrice = tourData.adultPrice * baseAdultCount + tourData.childPrice * child + extraTotal;
   //dùng để gom toàn bộ logic xử lý phần review (đánh giá) lại một chỗ,
   const { review, totalReviews, averageRating, visibleReviews, handleLoadMore } = useReview();
+  console.log("length:", review.list.length);
+  console.log("visible:", visibleReviews);
+  console.log("review.list:", review.list);
 
-  const { tour, schedules, price, services, loading, error } = useTourDetail();
+  const { tour, schedules, price, services, reviews , loading, error } = useTourDetail();
+
+  
   const validScheduleDates =
     schedules?.map((item) =>
       new Date(item.ngaykhoihanh).toISOString().split("T")[0]
@@ -67,17 +69,6 @@ function BookingContent() {
         .toISOString()
         .split("T")[0]
       : "";
-
-
-
-  //Test
-  console.log("=== TOUR DETAIL ===");
-  console.log("loading:", loading);
-  console.log("error:", error);
-  console.log("tour:", tour);
-  console.log("schedules:", schedules);
-  console.log("price:", price);
-  console.log("services:", services);
 
   if (loading) return <p className="p-8">Đang tải...</p>;
   if (error) return <p className="p-8 text-red-500">Lỗi: {error}</p>;
@@ -265,13 +256,13 @@ function BookingContent() {
                       className="bg-white rounded-2xl p-5 shadow-sm border flex flex-col"
                     >
                       <div className="font-medium text-gray-700 mb-3">
-                        Loại dịch vụ:{" "}
+                        <span className="font-bold">Loại dịch vụ:</span>{" "}
                         {(service.dichvuId as any)?.serviceTypeId?.loaidichvu}
                       </div>
 
                       <div className="text-sm text-gray-600">
                         <div className=" text-sm text-gray-600">
-                          <p className="font-medium text-gray-800 mb-1">
+                          <p className="font-bold text-gray-700 mb-1">
                             Dịch vụ bao gồm
                           </p>
                           <ul className="list-disc pl-5 space-y-1">
@@ -283,7 +274,7 @@ function BookingContent() {
                       {isExpanded && (
                         <>
                           <div className="mt-4 text-sm text-gray-600">
-                            <p className="font-medium text-gray-800 mb-1">
+                            <p className="font-bold text-gray-700 mb-1">
                               Dịch vụ không bao gồm
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
@@ -292,7 +283,7 @@ function BookingContent() {
                           </div>
 
                           <div className="mt-4 text-sm text-gray-600">
-                            <p className="font-medium text-gray-800 mb-1">
+                            <p className="font-bold text-gray-700 mb-1">
                               Điều khoản
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
@@ -389,30 +380,30 @@ function BookingContent() {
 
                       {/*nút chọn và giá */}
                       <div className="flex items-center gap-4 shrink-0 ml-auto">
-  {!isExpanded && (
-    <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
-      đ {service.giaApDungNguoiLon.toLocaleString()}
-    </p>
-  )}
+                        {!isExpanded && (
+                          <p className="font-semibold text-xl text-gray-900 whitespace-nowrap">
+                            đ {service.giaApDungNguoiLon.toLocaleString()}
+                          </p>
+                        )}
 
-  <button
-    onClick={() => {
-        toggleExtra(service._id); // "Chọn" → hiện form
-    }}
-    className="px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white"
-  >
-    {isSelected ? "Đặt ngay" : "Chọn"}
-  </button>
+                        <button
+                          onClick={() => {
+                            toggleExtra(service._id); // "Chọn" → hiện form
+                          }}
+                          className="px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          {isSelected ? "Đặt ngay" : "Chọn"}
+                        </button>
 
-  {isSelected && (
-    <button
-      onClick={() => toggleExtra(service._id)} // "Hủy" → ẩn form
-      className="px-4 py-2.5 text-sm font-medium rounded-full border border-gray-300 hover:bg-gray-100 text-gray-600"
-    >
-      ✕ Hủy
-    </button>
-  )}
-</div>
+                        {isSelected && (
+                          <button
+                            onClick={() => toggleExtra(service._id)} // "Hủy" → ẩn form
+                            className="px-4 py-2.5 text-sm font-medium rounded-full border border-gray-300 hover:bg-gray-100 text-gray-600"
+                          >
+                            ✕ Hủy
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -453,7 +444,7 @@ function BookingContent() {
                     locale={vi}
                     dateFormat="dd/MM/yyyy"
                     includeDates={validDatesAsDate}
-                    placeholderText="Chọn ngày khởi hành" // 👈 thêm khoảng trắng
+                    placeholderText="Chọn ngày khởi hành" 
                     className="w-full border border-gray-300 rounded-lg pl-3 pt-3 pb-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none text-gray-600 mr-40"
                   />
 
@@ -557,9 +548,9 @@ function BookingContent() {
 
           {/* ===== List review ===== */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 " id="reviews-container ">
-            {review.list.slice(0, visibleReviews).map((item) => (
+            {reviews.slice(0, visibleReviews).map((review) => (
               <div
-                key={item.id}
+                key={review._id}
                 className="bg-white border rounded-2xl p-6 shadow-sm border-1 border-gray-400"
               >
                 <div className="flex items-center gap-3 ">
@@ -570,17 +561,17 @@ function BookingContent() {
 
                   {/* Info */}
                   <div>
-                    <p className="font-medium text-gray-800">{item.name}</p>
+                    <p className="font-medium text-gray-800">{(review.Users_ID as any)?.hoten}</p>
                     <div className="flex text-yellow-400 text-lg">
-                      {"★".repeat(item.rating)}
-                      {"☆".repeat(5 - item.rating)}
+                      {"★".repeat(review.Sosao)}
+                      {"☆".repeat(5 - review.Sosao)}
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
                 <p className="mt-4 text-gray-600 text-[15px] leading-relaxed">
-                  {item.content}
+                  {review.Noidung};
                 </p>
               </div>
             ))}

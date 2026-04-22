@@ -8,7 +8,7 @@ const reviewSchema = new mongoose.Schema(
       required: true,
     },
 
-    Tour_ID: {
+    Tour_Id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tour",
       required: true,

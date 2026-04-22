@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getTourById } from "@/services/bookingService";
 import { tourData } from "@/components/tourData";
-import { TourRaw, ScheduleRaw, TourPriceRaw, TourServiceRaw } from "@/types/booking";
+import { TourRaw, ScheduleRaw, TourPriceRaw, TourServiceRaw, Review } from "@/types/booking";
 
 
 
@@ -48,8 +48,8 @@ export const useBooking = () => {
     };
 };
 
-export const useSelectedExtras  = () => {
-    const [selectedExtras, setSelectedExtras] = useState<String[]>([]);
+export const useSelectedExtras = () => {
+    const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
 
     // chọn bỏ dịch vụ thêm , chọn nhiều option trong form, xử lý checkbox list
     const toggleExtra = (id: string) => {
@@ -66,19 +66,18 @@ export const useSelectedExtras  = () => {
     }
 }
 
-export const useAdultCount  = () => {
+export const useAdultCount = () => {
     const [adult, setAdult] = useState(1);
     const [child, setChild] = useState(0);
     const baseAdultCount = adult > 0 ? adult : 1;
     return {
-        adult, 
+        adult,
         setAdult,
         child,
         setChild,
         baseAdultCount
     }
 }
-
 
 export const useReview = () => {
     //Lấy danh sách đánh giá từ tourData
@@ -87,7 +86,7 @@ export const useReview = () => {
     const [visibleReviews, setVisibleReviews] = useState(4);
     //Tổng số review
     const totalReviews = review.list.length;
-//Tính điểm trung bình
+    //Tính điểm trung bình
     const averageRating =
         totalReviews > 0
             ? review.list.reduce((sum, item) => sum + item.rating, 0) / totalReviews
@@ -98,52 +97,50 @@ export const useReview = () => {
         setVisibleReviews(prev => Math.min(prev + 4, review.list.length));
     };
     return {
-    review,
-    totalReviews,
-    averageRating,
-    visibleReviews,
-    handleLoadMore
-  };
+        review,
+        totalReviews,
+        averageRating,
+        visibleReviews,
+        handleLoadMore
+    };
 };
-
-
-
 interface TourDetail {
-  tour: TourRaw;
-  schedules: ScheduleRaw[];
-  tourPrices: TourPriceRaw[];
-  tourServices: TourServiceRaw[];
+    tour: TourRaw;
+    schedules: ScheduleRaw[];
+    tourPrices: TourPriceRaw[];
+    tourServices: TourServiceRaw[];
+    reviews: Review[];
 }
 
-
 export const useTourDetail = () => {
-  const searchParams = useSearchParams();
-  const tourId = searchParams.get("tourId");
+    const searchParams = useSearchParams();
+    const tourId = searchParams.get("tourId");
 
-  const [data, setData]       = useState<TourDetail | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+    const [data, setData] = useState<TourDetail | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!tourId) return;
+    useEffect(() => {
+        if (!tourId) return;
 
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const result = await getTourById(tourId);
-        setData(result);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+        const fetch = async () => {
+            setLoading(true);
+            try {
+                const result = await getTourById(tourId);
+                setData(result);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    fetch();
-  }, [tourId]);
-  const tour        = data?.tour ?? null;  // Lấy tour từ data, nếu không có thì trả về null
-  const schedules   = data?.schedules ?? [];
-  const price       = data?.tourPrices?.[0] ?? null;   // lấy giá đầu tiên
-  const services    = data?.tourServices ?? [];
-  return { tour, schedules, price, services, loading, error, tourId };
+        fetch();
+    }, [tourId]);
+    const tour = data?.tour ?? null;  // Lấy tour từ data, nếu không có thì trả về null
+    const schedules = data?.schedules ?? [];
+    const price = data?.tourPrices?.[0] ?? null;   // lấy giá đầu tiên
+    const services = data?.tourServices ?? [];
+    const reviews = data?.reviews ?? [];  // Lấy đánh giá từ tourData
+    return { tour, schedules, price, services, reviews , loading, error, tourId };
 };

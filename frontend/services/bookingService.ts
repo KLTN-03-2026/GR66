@@ -13,6 +13,7 @@ export const getTourById = async (id: string): Promise<TourDetailResponse["data"
   console.log("Schedules:", json.data.schedules);
   console.log("Prices:", json.data.tourPrices);
   console.log("Services:", json.data.tourServices);
+  console.log("Reviews:", json.data.reviews);
 
   return json.data;
 };
