@@ -34,8 +34,6 @@ export const signUpService = async (data) => {
     })
     return newUser
 }
-
-
 //Đăng nhập bằnhg email và mật khẩu\
 export const logincServices = async (data) => {
     const { email, matkhau } = data;
@@ -70,7 +68,6 @@ export const logincServices = async (data) => {
     // Trả về access token và thông tin user (không bao gồm mật khẩu)
     return { accessToken, refreshToken, user: userData };
 }
-
 // Đăng nhập hoặc đăng ký với google
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const loginGoogle = async (token) => {
@@ -133,7 +130,6 @@ export const loginGoogle = async (token) => {
         user: userObj,
     };
 };
-
 // Đăng xuất
 export const logoutService = async (refreshToken) => {
     if(refreshToken){

@@ -39,17 +39,16 @@ function BookingContent() {
 
   // đảm bảo số lượng người lớn tối thiểu là 1
   const { adult, setAdult, child, setChild, baseAdultCount } = useAdultCount();
-
-  // tính tổng tiền các dịch vụ thêm mà người dùng đã chọn
-  let extraTotal = 0;
-
-
+  // khai báo biến và hàm để lấy dữ liệu tour, lịch khởi hành, giá, dịch vụ thêm, đánh giá
   const { tour, schedules, price, services, reviews , loading, error } = useTourDetail();
+  // khai báo biến và hàm để xử lý phần đánh giá
   const { totalReviews, averageRating, visibleReviews, handleLoadMore } = useReview(reviews);
+
+   // tính tổng tiền các dịch vụ thêm mà người dùng đã chọn
+  let extraTotal = services.filter((s) => selectedExtras.includes(s._id)).reduce((sum, s) => sum + s.giaApDungNguoiLon * adultCount + s.giaApDungTreEm * childCount, 0);
+
   //tính tổng tiền tour cuối cùng cho người dùng
   const totalPrice = (price?.giaNguoiLon ?? 0) * baseAdultCount + (price?.giaTreEm ?? 0) * child +(extraTotal ?? 0);
-
-
   
   const validScheduleDates =
     schedules?.map((item) =>
@@ -383,11 +382,17 @@ function BookingContent() {
 
                         <button
                           onClick={() => {
-                            toggleExtra(service._id); // "Chọn" → hiện form
+                            if (isSelected) {
+                              //Đặt ngay: KHÔNG toggle nữa, chỉ xử lý đặt
+                              //handleBooking(service._id);
+                            } else {
+                              //mở form
+                              toggleExtra(service._id);
+                            }
                           }}
                           className="px-9 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white"
                         >
-                          {isSelected ? "Đặt ngay" : "Chọn"}
+                          {isSelected ? "Đặt dịch vụ" : "Chọn"}
                         </button>
 
                         {isSelected && (
@@ -395,7 +400,7 @@ function BookingContent() {
                             onClick={() => toggleExtra(service._id)} // "Hủy" → ẩn form
                             className="px-4 py-2.5 text-sm font-medium rounded-full border border-gray-300 hover:bg-gray-100 text-gray-600"
                           >
-                            ✕ Hủy
+                            ✕ Ẩn hiện
                           </button>
                         )}
                       </div>

@@ -4,8 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { getTourById } from "@/services/bookingService";
 import { TourRaw, ScheduleRaw, TourPriceRaw, TourServiceRaw, Review } from "@/types/booking";
 
-
-
 export const useExtraDetail = () => {
     const [expandedExtras, setExpandedExtras] = useState<string[]>([]);
     // bật tắt thêm chi tiết thông tin
@@ -21,7 +19,6 @@ export const useExtraDetail = () => {
         toggleExtraDetail,
     };
 };
-
 
 export const useBooking = () => {
     const [checkInDate, setCheckInDate] = useState(""); // lưu ngày người dùng . ban đầu để rỗng
@@ -88,7 +85,7 @@ export const useReview = (reviews: Review[]) => {
             ? reviews.reduce((sum, item) => sum + item.Sosao, 0) / totalReviews
             : 0;
 
-    //reset khi API thay đổi
+    // 🔥 reset khi API thay đổi
     useEffect(() => {
         setVisibleReviews(4);
     }, [reviews]);
