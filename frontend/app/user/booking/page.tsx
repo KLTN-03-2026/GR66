@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { tourData } from "@/components/tourData";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FaMapMarkerAlt } from "react-icons/fa";
@@ -45,15 +44,11 @@ function BookingContent() {
   let extraTotal = 0;
 
 
-  //tính tổng tiền tour cuối cùng cho người dùng
-  const totalPrice = tourData.adultPrice * baseAdultCount + tourData.childPrice * child + extraTotal;
-  //dùng để gom toàn bộ logic xử lý phần review (đánh giá) lại một chỗ,
-  const { review, totalReviews, averageRating, visibleReviews, handleLoadMore } = useReview();
-  console.log("length:", review.list.length);
-  console.log("visible:", visibleReviews);
-  console.log("review.list:", review.list);
-
   const { tour, schedules, price, services, reviews , loading, error } = useTourDetail();
+  const { totalReviews, averageRating, visibleReviews, handleLoadMore } = useReview(reviews);
+  //tính tổng tiền tour cuối cùng cho người dùng
+  const totalPrice = (price?.giaNguoiLon ?? 0) * baseAdultCount + (price?.giaTreEm ?? 0) * child +(extraTotal ?? 0);
+
 
   
   const validScheduleDates =
@@ -97,7 +92,7 @@ function BookingContent() {
         </h1>
         <div className="flex">
           <p className="text-sm text-gray-500 mt-1 mb-3  ">
-            ⭐ {tourData.rating} | {tourData.reviews} đánh giá
+            ⭐ {averageRating.toFixed(1)} | {totalReviews} đánh giá
           </p>
 
           <h2 className="text-sm text-gray-500 mt-1 mb-3 ml-8 flex items-center gap-1">
@@ -472,7 +467,10 @@ function BookingContent() {
 
               {/* Số trẻ em */}
               <div className="flex justify-between items-center mb-6">
-                <span className="text-lg text-gray-800">Số trẻ em</span>
+                <div className="flex flex-col">
+                  <span className="text-lg text-gray-800">Số trẻ em</span>
+                  <span className="text-sm text-gray-500">(100cm = 139cm)</span>
+                </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <button onClick={() => setChild(Math.max(0, child - 1))} className="w-8 h-8 flex items-center justify-center text-xl border border-gray-300 
                 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-all">−</button>
@@ -514,17 +512,22 @@ function BookingContent() {
               </div>
 
               <p className="text-blue-600 mt-1 font-medium">
-                {review.list.length} đánh giá
+                {reviews.length} đánh giá
               </p>
             </div>
 
             {/* Thanh phần trăm theo số sao */}
             <div className="flex-1 space-y-3 mt-3">
               {[5, 4, 3, 2, 1].map((star) => {
-                const count = review.list.filter(r => r.rating === star).length;
-                const percent = review.list.length > 0
-                  ? Math.round((count / review.list.length) * 100)
-                  : 0;
+                const count = reviews.filter((r) => r.Sosao === star).length; // tọa biến đếm cho số lượng sao (r) lấy ra tại thời
+                //điểm hiện tại , filter lọc ra , lấy từng review (r), nếu số sao của nó = star thì giữ lại lấy tổng số lượng đó ra
+                let percent = 0;
+                if (reviews.length > 0) {
+                  // tổng số sao chia cho tổng số review để ra phần trăm
+                  percent = Math.round((count / reviews.length) * 100);
+                } else {
+                  percent = 0;
+                }
 
                 return (
                   <div key={star} className="flex items-center gap-3">
@@ -578,7 +581,7 @@ function BookingContent() {
           </div>
 
           {/* Nút Xem thêm */}
-          {visibleReviews < review.list.length && (
+          {visibleReviews < reviews.length && (
             <div className="flex justify-center mt-10">
               <button
                 onClick={handleLoadMore}

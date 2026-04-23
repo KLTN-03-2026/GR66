@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getTourById } from "@/services/bookingService";
-import { tourData } from "@/components/tourData";
 import { TourRaw, ScheduleRaw, TourPriceRaw, TourServiceRaw, Review } from "@/types/booking";
 
 
@@ -79,31 +78,34 @@ export const useAdultCount = () => {
     }
 }
 
-export const useReview = () => {
-    //Lấy danh sách đánh giá từ tourData
-    const review = tourData.reviewSection;
-    //State số lượng review hiển thị
+export const useReview = (reviews: Review[]) => {
     const [visibleReviews, setVisibleReviews] = useState(4);
-    //Tổng số review
-    const totalReviews = review.list.length;
-    //Tính điểm trung bình
+
+    const totalReviews = reviews.length;
+
     const averageRating =
         totalReviews > 0
-            ? review.list.reduce((sum, item) => sum + item.rating, 0) / totalReviews
+            ? reviews.reduce((sum, item) => sum + item.Sosao, 0) / totalReviews
             : 0;
 
-    //Load thêm review
+    //reset khi API thay đổi
+    useEffect(() => {
+        setVisibleReviews(4);
+    }, [reviews]);
+
     const handleLoadMore = () => {
-        setVisibleReviews(prev => Math.min(prev + 4, review.list.length));
+        setVisibleReviews(prev => Math.min(prev + 4, totalReviews));
     };
+
     return {
-        review,
+        reviews,
         totalReviews,
         averageRating,
         visibleReviews,
         handleLoadMore
     };
 };
+
 interface TourDetail {
     tour: TourRaw;
     schedules: ScheduleRaw[];

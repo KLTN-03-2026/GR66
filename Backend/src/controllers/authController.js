@@ -1,5 +1,11 @@
-import { signUpService, logincServices, loginGoogle, logoutService } from "../services/authService.js";
-import { REFRESH_TOKEN_TTL } from "../constants/Auth.js";
+import { signUpService , logincServices , loginGoogle ,logoutService} from "../services/authService.js";
+import {REFRESH_TOKEN_TTL} from "../constants/Auth.js";
+import otpGenerator from 'otp-generator';
+import { SendMailForgotPassword } from '../utils/mailForgotPassword.js';
+import userSchema from  "../models/users.js";
+import otpModel from "../models/otp.model.js";
+import jwt from "jsonwebtoken"; 
+import bcrypt from "bcryptjs";
 
 export const signupController = async (req, res) => {
     try {
@@ -96,3 +102,119 @@ export const authMe = async (req, res) => {
         });
     }
 }
+//Quên mật khẩu
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const findUser = await userSchema.findOne({ email });
+    if (!findUser) {
+        return res.status(404).json({
+        message: "Email không tồn tại"
+    });
+    }
+    const otp = otpGenerator.generate(6, {
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+    });
+    
+    const tokenForgotPassword = jwt.sign({ email }, process.env.JWT_SECRET, { 
+        expiresIn: '5m' 
+    });
+
+    res.cookie("tokenForgotPassword", tokenForgotPassword, {
+        httpOnly: false,
+        secure: false, 
+        sameSite: "strict",
+        maxAge: 5 * 60 * 1000, 
+    });
+
+    await otpModel.create({
+        otp,
+        email,
+    });
+
+    await SendMailForgotPassword(email, otp);
+    return res.status(200).json({
+        message: "Mã OTP đã được gửi đến email của bạn",
+        success: true
+    });
+}
+//Verify OTP
+// Verify OTP + đổi mật khẩu
+export const verifyForgotPassword = async (req, res) => {
+    try {
+        const { otp, password } = req.body || {};
+        const tokenForgotPassword = req.cookies?.tokenForgotPassword;
+
+        console.log("BODY:", req.body);
+        console.log("OTP:", otp);
+        console.log("TOKEN:", tokenForgotPassword);
+
+        if (!tokenForgotPassword || !otp || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Bạn đang thiếu thông tin"
+            });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(tokenForgotPassword, process.env.JWT_SECRET);
+        } catch (error) {
+            return res.status(400).json({
+                success: false,
+                message: "Token không hợp lệ hoặc đã hết hạn. Vui lòng gửi lại yêu cầu"
+            });
+        }
+
+        const email = decoded.email;
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Token không hợp lệ"
+            });
+        }
+
+        const findOtp = await otpModel.findOne({ email, otp });
+        if (!findOtp) {
+            return res.status(400).json({
+                success: false,
+                message: "Mã OTP không hợp lệ"
+            });
+        }
+
+        const findUser = await userSchema.findOne({ email });
+        if (!findUser) {
+            return res.status(404).json({
+                success: false,
+                message: "Người dùng không tồn tại"
+            });
+        }
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        findUser.password = hashedPassword;
+
+        await findUser.save();
+
+        await otpModel.deleteMany({ email });
+
+        res.clearCookie("tokenForgotPassword");
+
+        return res.status(200).json({
+            success: true,
+            message: "Khôi phục mật khẩu thành công"
+        });
+    } catch (error) {
+        console.error("Lỗi verifyForgotPassword:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi server"
+        });
+    }
+};
+
+
+
+
