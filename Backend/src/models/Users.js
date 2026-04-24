@@ -4,7 +4,9 @@ const userSchema = new mongoose.Schema(
   {
     role: {
       type: String,
-      trim: true,
+      enum: ["Admin", "user"],
+      default: "user",
+      required: true,
     },
 
     hoten: {
@@ -19,7 +21,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
-    ngaysinh:  {
+    ngaysinh: {
       type: Date,
     },
 
@@ -33,7 +35,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true, // cho phép null mà không lỗi unique
     },
-    
+
     sdt: {
       type: String,
     },
@@ -53,6 +55,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
+    collection: "users",
     timestamps: {
       createdAt: "thoigiantao",
       updatedAt: "thoigiancapnhat",
@@ -60,6 +63,5 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("Users", userSchema);
-
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 export default User;

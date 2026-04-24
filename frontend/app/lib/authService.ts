@@ -1,12 +1,10 @@
 import { CredentialResponse } from '@react-oauth/google';
-import { debug } from 'node:util';
+import { jwtDecode } from "jwt-decode";
 
 //Đăng ký , đăng nhập bằng gg
 export const handleGoogleSuccess = async (credentialResponse: CredentialResponse,) => {
   console.log("Đăng nhập google thành công", credentialResponse);
-
   const token = credentialResponse.credential;
-
   try {
     const res = await fetch("http://localhost:3001/api/auth/google", {
       method: "POST",
@@ -15,13 +13,12 @@ export const handleGoogleSuccess = async (credentialResponse: CredentialResponse
       },
       body: JSON.stringify({ token }),
     });
-
     const data = await res.json();
     console.log("Server response:", data);
-    // TODO: Lưu token và redirect làm sau
-
     if(data.success){
-        window.location.href = "/";
+      localStorage.setItem("accessToken", data.user.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.user.user));
+      window.location.href = "/";
     }
 
   } catch (err) {
@@ -52,7 +49,6 @@ export const handleEmailSignup = async (
       alert("Mật khẩu xác nhận không khớp");
       return;
     }
-
     const res = await fetch("http://localhost:3001/api/auth/signup", {
       method: "POST",
       headers: {
@@ -83,7 +79,6 @@ export const handleEmailSignup = async (
     throw error;
   }
 }
-
 
 // đăng nhập bằng email và mật khẩu
 export const handleEmailLogin = async (
@@ -116,6 +111,7 @@ export const handleEmailLogin = async (
       console.log("Đăng nhập thành công:", data);
     if(data.success){
         localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "/";
     }
       // TODO: Lưu token và redirect làm sau
@@ -123,22 +119,20 @@ export const handleEmailLogin = async (
       alert(data.message || "Đăng nhập thất bại");
       throw new Error(data.message || "Login failed");
     }
-
-    
   } catch (err) {
     console.error("Login failed:", err);
   } 
 };
 
+// Đăng nhập lỗi trên gg
 export const handleGoogleError =   () => {
   alert("Không có quyền truy cập");
 };
 
-
 // JSON WEB TOKEN 
 export const getUserProfile = async () => {
   console.log("getUserProfile đã được gọi");
-  const token = localStorage.getItem("accessToken");
+  const token =localStorage.getItem("accessToken");
 
   const res = await fetch("http://localhost:3001/api/users/me", {
     method: "GET",
@@ -151,4 +145,33 @@ export const getUserProfile = async () => {
   const data = await res.json();
   return data;
 };
+
+// kiểm tra token đã hết hạn chưa, 
+export const checkTokenExpiration = () => {
+  const token = localStorage.getItem("accessToken"); // lấy token từ local storage
+  if (!token) return;  // nếu không có token thì không cần kiểm tra gì cả
+  try {
+    const decoded: any = jwtDecode(token);  // giải mã token để lấy thông tin bên trong, đặc biệt là exp (thời gian hết hạn)
+    const isExpired = decoded.exp * 1000 < Date.now(); // so sánh thời gian hết hạn (exp) với thời gian hiện tại. 
+
+    if (isExpired) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      window.location.href = "http://localhost:3000/account/login";
+    }
+  } catch (err) {
+    console.error("Token lỗi:", err);
+    localStorage.removeItem("accessToken");
+  }
+};
+
+// Đăng xuất:
+export const logout = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
+  window.location.href = "http://localhost:3000/account/login";   
+}
+
+
+
 

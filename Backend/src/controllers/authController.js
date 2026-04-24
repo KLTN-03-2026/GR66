@@ -7,7 +7,7 @@ import otpModel from "../models/otp.model.js";
 import jwt from "jsonwebtoken"; 
 import bcrypt from "bcryptjs";
 
-export const signupController = async(req, res) => {
+export const signupController = async (req, res) => {
     try {
         const user = await signUpService(req.body)
         return res.status(201).json({
@@ -15,7 +15,7 @@ export const signupController = async(req, res) => {
             message: "Đăng kí thành công",
             user
         })
-    }catch(err){
+    } catch (err) {
         const status = err.status || 400;
         return res.status(status).json({
             success: false,
@@ -25,7 +25,7 @@ export const signupController = async(req, res) => {
 }
 
 export const loginController = async (req, res) => {
-    try{
+    try {
         const { accessToken, refreshToken, user } = await logincServices(req.body);
 
         res.cookie("refreshToken", refreshToken, {
@@ -44,14 +44,11 @@ export const loginController = async (req, res) => {
         return res.status(401).json({
             message: err.message
         })
-
     }
 }
-
 export const loginWithGoogle = async (req, res) => {
-   try{
+    try {
         const { token } = req.body
-
         // Gọi hàm xử lý logic (đảm bảo hàm này trả về Object)
         const userData = await loginGoogle(token);
         // Trả về json để Frontend không bị lỗi SyntaxError
@@ -59,26 +56,30 @@ export const loginWithGoogle = async (req, res) => {
             success: true,
             user: userData
         });
-
-    }catch(err){
+    } catch (err) {
         console.error("Lỗi tại Backend:", err);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Internal Server Error" 
+        console.error(err.message);
+        console.error(err.stack)
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
         });
     }
 }
-
 // Đăng xuất
 export const logoutController = async (req, res) => {
-     try {
-        const token  = req.cookies?.refreshToken;
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+        // gọi service để xóa session và cookie
+        await logoutService(refreshToken);
+        //xóa cookie
+        res.clearCookie("refreshToken");
         return res.status(201).json({
             success: true,
             message: "Đăng xuất thành công",
             user
         })
-    }catch(err){
+    } catch (err) {
         const status = err.status || 400;
         return res.status(status).json({
             success: false,
@@ -86,7 +87,6 @@ export const logoutController = async (req, res) => {
         })
     }
 }
-
 //JWT
 export const authMe = async (req, res) => {
     try {
@@ -102,6 +102,8 @@ export const authMe = async (req, res) => {
         });
     }
 }
+
+
 //Quên mật khẩu
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
@@ -210,7 +212,6 @@ export const verifyForgotPassword = async (req, res) => {
         });
     }
 };
-
 
 
 
