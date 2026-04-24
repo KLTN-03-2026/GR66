@@ -18,7 +18,7 @@ export const signUpService = async (data) => {
         const err = new Error("Email đã tồn tại");
         err.status = 409; 
         throw err;
-    }
+    }   
     // mã hóa mật khẩu
     const hashPassword = await bcrypt.hash(matkhau, 10); // salt = 10 2^10 số lần trộn
     // tạo user mới

@@ -10,7 +10,12 @@ import { ProtetedRoute } from './middlewares/authMiddlewares.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 //middleware 
 app.use(express.json()); // cho phép server đọc Json
 

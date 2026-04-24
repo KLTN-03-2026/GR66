@@ -140,16 +140,11 @@ export const forgotPassword = async (req, res) => {
         success: true
     });
 }
-//Verify OTP
 // Verify OTP + đổi mật khẩu
 export const verifyForgotPassword = async (req, res) => {
     try {
         const { otp, password } = req.body || {};
         const tokenForgotPassword = req.cookies?.tokenForgotPassword;
-
-        console.log("BODY:", req.body);
-        console.log("OTP:", otp);
-        console.log("TOKEN:", tokenForgotPassword);
 
         if (!tokenForgotPassword || !otp || !password) {
             return res.status(400).json({
@@ -194,7 +189,8 @@ export const verifyForgotPassword = async (req, res) => {
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        findUser.password = hashedPassword;
+
+        findUser.matkhau = hashedPassword;
 
         await findUser.save();
 
